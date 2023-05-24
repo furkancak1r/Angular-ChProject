@@ -1,0 +1,41 @@
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
+
+@Component({
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss']
+})
+export class HomeComponent implements OnInit {
+  otherDataForm: FormGroup;
+
+  constructor(private formBuilder: FormBuilder) {
+    this.otherDataForm = this.formBuilder.group({
+      width: null,
+      height: null,
+      horizontalLines: null,
+      verticalLines: null,
+      horizontalDistances: [],
+      verticalDistances: []
+    });
+  }
+
+  ngOnInit(): void {}
+
+  onSubmit(): void {
+    // Access the values of distances for horizontal and vertical lines
+    const horizontalDistances = this.otherDataForm.value.horizontalDistances;
+    const verticalDistances = this.otherDataForm.value.verticalDistances;
+
+    // Log the distances for horizontal and vertical lines
+    console.log('Horizontal Distances:', horizontalDistances);
+    console.log('Vertical Distances:', verticalDistances);
+
+    // Clear the form after submission (optional)
+    this.otherDataForm.reset();
+  }
+
+  getLinesArray(lineCount: number): number[] {
+    return Array(lineCount).fill(0).map((_, index) => index + 1);
+  }
+}
