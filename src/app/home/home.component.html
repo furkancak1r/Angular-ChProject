@@ -1,0 +1,130 @@
+
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; height: 100vh;"
+    >
+      <div class="col-md-4">
+        <canvas #canvas></canvas>
+      </div>
+      <div class="col-md-3">
+        <form
+          [formGroup]="otherDataForm"
+          (ngSubmit)="onSubmit()"
+          class="form-group mb-3"
+        >
+          <label for="width" class="mr-2">Dikdörtgenin genişliği (mm):</label>
+          <input
+            type="number"
+            id="width"
+            name="width"
+            class="form-control form-control-sm"
+            formControlName="width"
+          />
+
+          <label for="height" class="mr-2">Dikdörtgenin yüksekliği (mm):</label>
+          <input
+            type="number"
+            id="height"
+            name="height"
+            class="form-control form-control-sm"
+            formControlName="height"
+          />
+
+          <ng-container
+            *ngIf="
+              otherDataForm.controls['width'].value > 0 &&
+              otherDataForm.controls['height'].value > 0
+            "
+          >
+            <label for="horizontalLines" class="mr-2"
+              >Yatayda kaç adet çizgi olsun:</label
+            >
+            <input
+              type="number"
+              id="horizontalLines"
+              name="horizontalLines"
+              class="form-control form-control-sm"
+              formControlName="horizontalLines"
+            />
+
+            <label for="verticalLines" class="mr-2"
+              >Dikeyde kaç adet çizgi olsun:</label
+            >
+            <input
+              type="number"
+              id="verticalLines"
+              name="verticalLines"
+              class="form-control form-control-sm"
+              formControlName="verticalLines"
+            />
+
+            <ng-container
+              *ngIf="
+                otherDataForm.controls['horizontalLines'].value > 0 &&
+                otherDataForm.controls['verticalLines'].value > 0
+              "
+            >
+              <div formGroupName="horizontalDistances">
+                <ng-container
+                  *ngFor="
+                    let line of this.getLinesArray(
+                      otherDataForm.controls['horizontalLines'].value
+                    );
+                    let i = index
+                  "
+                >
+                  <label>
+                    {{
+                      i === 0
+                        ? 'Yataydaki 1. çizginin dikdörtgen ile arasındaki mesafe kaç mm olmalı:'
+                        : 'Yataydaki ' +
+                          (i + 1) +
+                          '. çizginin ' +
+                          i +
+                          '. çizgi ile arasındaki mesafe kaç mm olmalı:'
+                    }}
+                    <input
+                      type="number"
+                      name="{{ 'distance_' + i }}"
+                      class="form-control form-control-sm"
+                      formControlName="{{ 'distance_' + i }}"
+                    />
+                  </label>
+                </ng-container>
+              </div>
+
+              <div formGroupName="verticalDistances">
+                <ng-container
+                  *ngFor="
+                    let line of this.getLinesArray(
+                      otherDataForm.controls['verticalLines'].value
+                    );
+                    let i = index
+                  "
+                >
+                  <label>
+                    {{
+                      i === 0
+                        ? 'Dikeyde 1. çizginin dikdörtgen ile arasındaki mesafe kaç mm olmalı:'
+                        : 'Dikeyde ' +
+                          (i + 1) +
+                          '. çizginin ' +
+                          i +
+                          '. çizgi ile arasındaki mesafe kaç mm olmalı:'
+                    }}
+                    <input
+                      type="number"
+                      name="{{ 'distance_' + i }}"
+                      class="form-control form-control-sm"
+                      formControlName="{{ 'distance_' + i }}"
+                    />
+                  </label>
+                </ng-container>
+              </div>
+            </ng-container>
+          </ng-container>
+
+          <button type="submit" class="btn btn-primary">Temizle</button>
+          <a href="https://github.com/furkancak1r/ChProject_Angular.git" target="_blank" class="btn btn-success">Github'a Git</a>
+        </form>
+      </div>
+    </div>
