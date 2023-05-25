@@ -131,20 +131,14 @@ export class HomeComponent implements OnInit {
     let height = this.otherDataForm.value.height;
     const horizontalDistances = this.otherDataForm.value.horizontalDistances;
     const verticalDistances = this.otherDataForm.value.verticalDistances;
-
     if (!width || !height) return;
-
     const canvas = this.canvas.nativeElement;
     const ctx = canvas.getContext('2d');
-
     if (!ctx) return;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Scale down rectangle and text if necessary
-    // Scale down rectangle and text if necessary
     let scale = 1;
-
     if (width > canvas.width - 20 || height > canvas.height - 20) {
       scale = Math.max(
         0.1,
@@ -170,7 +164,6 @@ export class HomeComponent implements OnInit {
 
     // Ensure text stays within canvas
     let textWidth = ctx.measureText(`Width: ${width / scale}mm`).width;
-
     let textX = Math.min(
       width + 20 + offsetX,
       (canvas.width - textWidth - 10) / scale
@@ -184,7 +177,6 @@ export class HomeComponent implements OnInit {
     );
 
     textWidth = ctx.measureText(`Height: ${height / scale}mm`).width;
-
     let textY = Math.min(height + 30 + offsetY, (canvas.height - 10) / scale);
 
     // Position text next to right side of rectangle
@@ -194,53 +186,62 @@ export class HomeComponent implements OnInit {
       height / (2 * scale) + offsetY
     );
 
-    let currentY = offsetY;
+    // Oda numaralarının yazılacağı font ve renk
+    ctx.font = '16px sans-serif';
+    ctx.fillStyle = 'black';
 
+    // Yatay çizgilerin koordinatlarını tutan bir dizi
+    const horizontalLines: number[] = [offsetY]; // Dikdörtgenin üst kenarını ekle
+
+    // Dikey çizgilerin koordinatlarını tutan bir dizi
+    const verticalLines: number[] = [offsetX]; // Dikdörtgenin sol kenarını ekle
+
+    // Metni yatay olarak ortalamak için textAlign özelliğini "center" olarak ayarla
+    ctx.textAlign = 'center';
+
+    // Yatay çizgileri ve koordinatlarını çiz
+    let currentY = offsetY;
     for (const key in horizontalDistances) {
       const distance = horizontalDistances[key];
       if (distance !== null) {
         currentY += distance;
         const isBeyondBounds = currentY > height + offsetY;
-
         ctx.beginPath();
         ctx.moveTo(offsetX, currentY);
         ctx.lineTo(width + offsetX, currentY);
         ctx.strokeStyle = isBeyondBounds ? 'red' : 'black';
         ctx.stroke();
-
         textWidth = ctx.measureText(`${distance}mm`).width;
-
         textX = Math.min(
           width + Math.max(20, textWidth) + offsetX,
           (canvas.width - textWidth - 10) / scale
         );
-
         ctx.fillStyle = isBeyondBounds ? 'red' : 'black';
         ctx.fillText(`${distance}mm`, textX, currentY);
+
+        // Yatay çizginin y koordinatını diziye ekle
+        horizontalLines.push(currentY);
       }
     }
+    horizontalLines.push(height + offsetY); // Dikdörtgenin alt kenarını ekle
 
+    // Dikey çizgileri ve koordinatlarını çiz
     let currentX = offsetX;
-
     for (const key in verticalDistances) {
       const distance = verticalDistances[key];
       if (distance !== null) {
         currentX += distance;
         const isBeyondBounds = currentX > width + offsetX;
-
         ctx.beginPath();
         ctx.moveTo(currentX, offsetY);
         ctx.lineTo(currentX, height + offsetY);
         ctx.strokeStyle = isBeyondBounds ? 'red' : 'black';
         ctx.stroke();
-
         textWidth = ctx.measureText(`${distance}mm`).width;
-
         textY = Math.min(
           height + Math.max(30, textWidth) + offsetY,
           (canvas.height - textWidth - 10) / scale
         );
-
         ctx.fillStyle = isBeyondBounds ? 'red' : 'black';
 
         // Position text below center of line
@@ -249,6 +250,58 @@ export class HomeComponent implements OnInit {
           currentX - textWidth / 2,
           height + offsetY + 20
         );
+
+        // Dikey çizginin x koordinatını diziye ekle
+        verticalLines.push(currentX);
+      }
+    }
+    verticalLines.push(width + offsetX); // Dikdörtgenin sağ kenarını ekle
+
+    // Her oda için bir numara yaz
+    let roomNumber = 1; // Oda numarasını tutan değişken
+    for (let i = 0; i < horizontalLines.length - 1; i++) {
+      // Son elemanı atla
+      for (let j = 0; j < verticalLines.length - 1; j++) {
+        // Son elemanı atla
+        // Oda numarasını metin olarak al
+        const number = roomNumber.toString();
+
+        // Metnin genişliğini ve yüksekliğini ölç
+        const textWidth = ctx.measureText(number).width;
+        const textHeight = parseInt(ctx.font);
+
+        // Metnin yazılacağı x ve y koordinatlarını hesapla
+        // x koordinatı, dikey çizginin ortasına denk gelir
+        // y koordinatı, yatay çizginin üzerine metnin yüksekliğinin yarısı kadar uzaklıkta olur
+
+        // Eğer ilk satır veya sütun ise, dikdörtgenin kenarından başla
+        let x =
+          j === 0 ? offsetX + textWidth / 2 : verticalLines[j] + textWidth / 2;
+
+        let y =
+          i === horizontalLines.length - 1
+            ? height + offsetY - textHeight / 2
+            : horizontalLines[i] - textHeight / 2;
+
+        // Oda genişliğini ve yüksekliğini hesapla
+        const roomWidth = verticalLines[j + 1] - verticalLines[j];
+        const roomHeight = horizontalLines[i + 1] - horizontalLines[i];
+
+        // Metnin x ve y koordinatlarına oda genişliğinin ve yüksekliğinin yarısını ekle
+        x += roomWidth / 2;
+        y += roomHeight / 2;
+
+        // Metnin x ve y koordinatlarına küçük bir düzeltme faktörü ekle
+        const correctionX = -2; // Bu değeri değiştirebilirsiniz
+        const correctionY = 4; // Bu değeri değiştirebilirsiniz
+        x += correctionX;
+        y += correctionY;
+
+        // Metni yaz
+        ctx.fillText(number, x, y);
+
+        // Oda numarasını arttır
+        roomNumber++;
       }
     }
 
