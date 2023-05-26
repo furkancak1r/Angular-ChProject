@@ -63,8 +63,12 @@
 
         <ng-container
           *ngIf="
-            otherDataForm.controls['horizontalLines'].value > 0 &&
-            otherDataForm.controls['verticalLines'].value > 0
+            (otherDataForm.controls['horizontalLines'].value >= 0 &&
+              otherDataForm.controls['verticalLines'].value > 0) ||
+            (otherDataForm.controls['horizontalLines'].value > 0 &&
+              otherDataForm.controls['verticalLines'].value >= 0) ||
+            (otherDataForm.controls['horizontalLines'].value > 0 &&
+              otherDataForm.controls['verticalLines'].value > 0)
           "
         >
           <div formGroupName="horizontalDistances">
@@ -125,17 +129,24 @@
             </ng-container>
           </div>
         </ng-container>
+
+        <label class="mr-2">Resim Yüklencek Alan Numarası:</label>
+        <input
+          type="number"
+          id="selectedAreaNumber"
+          name="selectedAreaNumber"
+          class="form-control form-control-sm"
+          formControlName="selectedAreaNumber"
+        />
+
+        <input
+          class="form-control"
+          type="file"
+          id="imageUpload"
+          accept="image/*"
+        />
       </ng-container>
-      <label class="mr-2"
-        >Boyanacak Alan Numarası:</label
-      >
-      <input
-        type="number"
-        id="selectedAreaNumber"
-        name="selectedAreaNumber"
-        class="form-control form-control-sm"
-        formControlName="selectedAreaNumber"
-      />
+
       <button type="submit" class="btn btn-primary">Temizle</button>
       <a
         href="https://github.com/furkancak1r/ChProject_Angular.git"
@@ -143,6 +154,7 @@
         class="btn btn-success"
         >Github'a Git</a
       >
+      <br />
     </form>
   </div>
 </div>

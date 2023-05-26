@@ -46,7 +46,6 @@ export class HomeComponent implements OnInit {
     // Subscribe to valueChanges observable of otherDataForm and call drawRectangle() method when any value changes.
     this.otherDataForm.valueChanges.subscribe(() => {
       this.drawRectangle();
-      this.changeAreaColor();
     });
   }
   addMaxValueListeners(controlName: string, maxValue: number): void {
@@ -128,6 +127,7 @@ export class HomeComponent implements OnInit {
       );
     }
   }
+
   drawRectangle(): void {
     let width = this.otherDataForm.value.width;
     let height = this.otherDataForm.value.height;
@@ -325,25 +325,43 @@ export class HomeComponent implements OnInit {
         // Metni yaz
         ctx.fillText(number, x, y);
 
-        // Seçilen oda numarasına ait alanı kırmızıya boyama
-        if (number === selectedAreaNumber) {
-          ctx.fillStyle = 'red';
-          ctx.fillRect(
-            selectedAreaX,
-            selectedAreaY,
-            selectedAreaWidth,
-            selectedAreaHeight
-          );
-          ctx.fillStyle = 'black';
+        // Upload edilen resmi canvas üzerine çiz
+        const fileInput = document.getElementById(
+          'imageUpload'
+        ) as HTMLInputElement;
+        if (fileInput.files && fileInput.files[0]) {
+          const file = fileInput.files[0];
+          const reader = new FileReader();
+
+          reader.onload = () => {
+            const image = new Image();
+            image.onload = () => {
+              // Draw the image on the canvas
+              if (number === selectedAreaNumber) {
+                ctx.drawImage(
+                  image,
+                  selectedAreaX,
+                  selectedAreaY,
+                  selectedAreaWidth,
+                  selectedAreaHeight
+                );
+              }
+            };
+
+            // Set the source of the image to the loaded file
+            image.src = reader.result as string;
+          };
+
+          // Read the selected file as a data URL
+          reader.readAsDataURL(file);
         }
 
         // Oda numarasını arttır
         roomNumber++;
       }
     }
+
     // Reset canvas context
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
-
-  changeAreaColor(): void {}
 }
