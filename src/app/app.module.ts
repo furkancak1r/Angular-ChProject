@@ -8,6 +8,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgChartsModule } from 'ng2-charts';
 
+import { FabricModule } from 'ngx-fabric-wrapper';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { NgChartsModule } from 'ng2-charts';
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
-    NgChartsModule
+    NgChartsModule,
+    FabricModule
 
 
   ],

@@ -17,6 +17,7 @@ export class HomeComponent implements OnInit {
       height: null,
       horizontalLines: null,
       verticalLines: null,
+      selectedAreaNumber: null,
       horizontalDistances: this.formBuilder.group({}),
       verticalDistances: this.formBuilder.group({}),
     });
@@ -45,6 +46,7 @@ export class HomeComponent implements OnInit {
     // Subscribe to valueChanges observable of otherDataForm and call drawRectangle() method when any value changes.
     this.otherDataForm.valueChanges.subscribe(() => {
       this.drawRectangle();
+      this.changeAreaColor();
     });
   }
   addMaxValueListeners(controlName: string, maxValue: number): void {
@@ -177,14 +179,20 @@ export class HomeComponent implements OnInit {
     );
 
     textWidth = ctx.measureText(`Height: ${height / scale}mm`).width;
-    let textY = Math.min(height + 30 + offsetY, (canvas.height - 10) / scale);
+    let textY = Math.min(
+      height + 30 + offsetY - 10, // Decrease 10 pixels to add some space
+      (canvas.height - textWidth - 10) / scale
+    );
 
     // Position text next to right side of rectangle
-    ctx.fillText(
-      `Height: ${height / scale}mm`,
-      width + offsetX + 10,
-      height / (2 * scale) + offsetY
-    );
+    ctx.save(); // Save current canvas state
+
+    // Rotate canvas 90 degrees clockwise
+    ctx.translate(width + offsetX + 20, height / (2 * scale) + offsetY);
+    ctx.rotate(Math.PI / 2);
+    ctx.fillText(`Height: ${height / scale}mm`, 0, 0);
+
+    ctx.restore(); // Restore canvas state
 
     // Oda numaralarının yazılacağı font ve renk
     ctx.font = '16px sans-serif';
@@ -256,9 +264,17 @@ export class HomeComponent implements OnInit {
       }
     }
     verticalLines.push(width + offsetX); // Dikdörtgenin sağ kenarını ekle
+    // Oda numarasını al
+    let selectedAreaNumber = (
+      document.getElementById('selectedAreaNumber') as HTMLInputElement | null
+    )?.value;
 
     // Her oda için bir numara yaz
     let roomNumber = 1; // Oda numarasını tutan değişken
+    let selectedAreaX = 0; // Seçilen oda numarasına ait x koordinatını tutan değişken
+    let selectedAreaY = 0; // Seçilen oda numarasına ait y koordinatını tutan değişken
+    let selectedAreaWidth = 0; // Seçilen oda numarasına ait genişliği tutan değişken
+    let selectedAreaHeight = 0; // Seçilen oda numarasına ait yüksekliği tutan değişken
     for (let i = 0; i < horizontalLines.length - 1; i++) {
       // Son elemanı atla
       for (let j = 0; j < verticalLines.length - 1; j++) {
@@ -286,6 +302,15 @@ export class HomeComponent implements OnInit {
         // Oda genişliğini ve yüksekliğini hesapla
         const roomWidth = verticalLines[j + 1] - verticalLines[j];
         const roomHeight = horizontalLines[i + 1] - horizontalLines[i];
+        // Eğer oda numarası seçilen oda numarasına eşitse, x ve y koordinatlarını ve genişlik ve yüksekliği kaydet
+        if (number === selectedAreaNumber) {
+          // selectedAreaX değerini dikey çizginin x koordinatı olarak ata
+          selectedAreaX = verticalLines[j];
+          // selectedAreaY değerini yatay çizginin y koordinatı olarak ata
+          selectedAreaY = horizontalLines[i];
+          selectedAreaWidth = roomWidth;
+          selectedAreaHeight = roomHeight;
+        }
 
         // Metnin x ve y koordinatlarına oda genişliğinin ve yüksekliğinin yarısını ekle
         x += roomWidth / 2;
@@ -300,12 +325,25 @@ export class HomeComponent implements OnInit {
         // Metni yaz
         ctx.fillText(number, x, y);
 
+        // Seçilen oda numarasına ait alanı kırmızıya boyama
+        if (number === selectedAreaNumber) {
+          ctx.fillStyle = 'red';
+          ctx.fillRect(
+            selectedAreaX,
+            selectedAreaY,
+            selectedAreaWidth,
+            selectedAreaHeight
+          );
+          ctx.fillStyle = 'black';
+        }
+
         // Oda numarasını arttır
         roomNumber++;
       }
     }
-
     // Reset canvas context
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
+
+  changeAreaColor(): void {}
 }
