@@ -61,13 +61,8 @@
           formControlName="verticalLines"
         />
 
-        <ng-container
-          *ngIf="
-            otherDataForm.controls['horizontalLines'].value > 0 &&
-            otherDataForm.controls['verticalLines'].value > 0
-          "
-        >
-          <div formGroupName="horizontalDistances">
+
+          <div id="horizontalDistancesId" formGroupName="horizontalDistances" class="hidden">
             <ng-container
               *ngFor="
                 let line of this.getLinesArray(
@@ -96,7 +91,7 @@
             </ng-container>
           </div>
 
-          <div formGroupName="verticalDistances">
+          <div id="verticalDistancesId" formGroupName="verticalDistances" class="hidden">
             <ng-container
               *ngFor="
                 let line of this.getLinesArray(
@@ -124,7 +119,6 @@
               </label>
             </ng-container>
           </div>
-        </ng-container>
         <div id="isImageUploaded" class="hidden">
           <label class="mr-2">Resim Yüklencek Alan Numarası:</label>
           <input

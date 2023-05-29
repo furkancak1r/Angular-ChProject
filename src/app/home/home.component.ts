@@ -46,8 +46,33 @@ export class HomeComponent implements OnInit {
     // Subscribe to valueChanges observable of otherDataForm and call drawRectangle() method when any value changes.
     this.otherDataForm.valueChanges.subscribe(() => {
       this.drawRectangle();
-    });
 
+      if (
+        !(this.otherDataForm.controls['horizontalLines'].value === null ||
+        this.otherDataForm.controls['horizontalLines'].value === undefined)
+      ) {
+        // değer null veya undefined ise
+        const horizontalDistancesId = document.getElementById(
+          'horizontalDistancesId'
+        );
+        if (horizontalDistancesId) {
+          horizontalDistancesId.classList.remove('hidden');
+        }
+      }
+
+      if (
+        !(this.otherDataForm.controls['verticalLines'].value === null ||
+        this.otherDataForm.controls['verticalLines'].value === undefined)
+      ) {
+        // değer null veya undefined ise
+        const verticalDistancesId = document.getElementById(
+          'verticalDistancesId'
+        );
+        if (verticalDistancesId) {
+          verticalDistancesId.classList.remove('hidden');
+        }
+      }
+    });
   }
 
   addMaxValueListeners(controlName: string, maxValue: number): void {
@@ -379,9 +404,8 @@ export class HomeComponent implements OnInit {
     // files nesnesinin boş olup olmadığını kontrol et
     if (files && files.length > 0) {
       // ilk dosyayı al
-        const element = document.getElementById('isImageUploaded');
-          element?.classList.remove('hidden');
-
-      }
+      const element = document.getElementById('isImageUploaded');
+      element?.classList.remove('hidden');
+    }
   }
 }
