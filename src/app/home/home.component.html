@@ -62,9 +62,7 @@
         />
 
         <ng-container
-          *ngIf="
-            otherDataForm.controls['horizontalLines'].value >= 0
-          "
+          *ngIf="otherDataForm.controls['horizontalLines'].value >= 0"
         >
           <div formGroupName="horizontalDistances">
             <ng-container
@@ -93,11 +91,10 @@
                 />
               </label>
             </ng-container>
-          </div>  </ng-container>
-          <ng-container
-          *ngIf="
-            otherDataForm.controls['verticalLines'].value >= 0
-          "
+          </div>
+        </ng-container>
+        <ng-container
+          *ngIf="otherDataForm.controls['verticalLines'].value >= 0"
         >
           <div formGroupName="verticalDistances">
             <ng-container
@@ -125,21 +122,21 @@
                   formControlName="{{ 'distance_' + i }}"
                 />
               </label>
-            </ng-container>
-          </div></ng-container>
+            </ng-container></div
+        ></ng-container>
 
-          <div id="isImageUploaded" class="hidden">
-            <label class="mr-2">Resim Yüklencek Alan Numarası:</label>
-            <input
-              type="number"
-              id="selectedAreaNumber"
-              name="selectedAreaNumber"
-              class="form-control form-control-sm"
-              formControlName="selectedAreaNumber"
-            />
-          </div>
-
+        <div id="isImageUploaded" class="hidden">
+          <label class="mr-2">Resim Yüklencek Alan Numarası:</label>
           <input
+            type="number"
+            id="selectedAreaNumber"
+            name="selectedAreaNumber"
+            class="form-control form-control-sm"
+            formControlName="selectedAreaNumber"
+          />
+        </div>
+
+        <input
           class="form-control"
           type="file"
           id="imageUpload"
@@ -149,13 +146,20 @@
       </ng-container>
 
       <button type="submit" class="btn btn-primary">Temizle</button>
+
+      <button
+        class="btn btn-primary"
+        id="send-button"
+        (click)="sendToServer(imageData)"
+      >
+        Kaydet
+      </button>
       <a
         href="https://github.com/furkancak1r/ChProject_Angular.git"
         target="_blank"
         class="btn btn-success"
         >Github'a Git</a
       >
-      <br />
     </form>
   </div>
 </div>

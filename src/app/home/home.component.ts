@@ -10,6 +10,7 @@ import { fabric } from 'fabric';
 export class HomeComponent implements OnInit {
   @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>;
   otherDataForm: FormGroup;
+  imageData!: { name: string; content: string };
 
   fabricCanvas: fabric.Canvas | null = null;
   constructor(private formBuilder: FormBuilder) {
@@ -131,6 +132,78 @@ export class HomeComponent implements OnInit {
         this.formBuilder.control(null)
       );
     }
+  }
+
+  sendToServer(imageData: { name: string; content: string }): void {
+    // Tüm inputları ve image hakkındaki verileri bir arrayde topla
+    var inputDataArray: any[] = [];
+    this.imageData = imageData;
+
+    // Inputların değerlerini al
+    var width = (<HTMLInputElement>document.getElementById('width')).value;
+    var height = (<HTMLInputElement>document.getElementById('height')).value;
+    var horizontalLines = (<HTMLInputElement>(
+      document.getElementById('horizontalLines')
+    )).value;
+    var selectedAreaNumber = (<HTMLInputElement>(
+      document.getElementById('selectedAreaNumber')
+    )).value;
+    var verticalLines = (<HTMLInputElement>(
+      document.getElementById('verticalLines')
+    )).value;
+
+    // Input değerlerini diziye nesne olarak ekle
+    inputDataArray.push(
+      { width: width },
+      { height: height },
+      { horizontalLines: horizontalLines },
+      { selectedAreaNumber: selectedAreaNumber },
+      { verticalLines: verticalLines },
+      imageData
+    );
+
+    // Yatay mesafe kontrollerinin değerlerini al
+    if (
+      this.otherDataForm.controls['horizontalLines'].value >= 0 &&
+      this.otherDataForm.get('horizontalDistances')
+    ) {
+      const horizontalDistances = this.otherDataForm.get('horizontalDistances');
+
+      if (horizontalDistances instanceof FormGroup) {
+        // Kontrollerin değerlerini diziye nesne olarak ekle
+        const distanceControls = Object.keys(horizontalDistances.controls);
+        for (let i = 0; i < distanceControls.length; i++) {
+          const distanceControl = horizontalDistances.get('distance_' + i);
+          if (distanceControl) {
+            inputDataArray.push({ ['distance_' + i]: distanceControl.value });
+          }
+        }
+      }
+    }
+
+    // Dikey mesafe kontrollerinin değerlerini al
+    if (
+      this.otherDataForm.controls['verticalLines'].value >= 0 &&
+      this.otherDataForm.get('verticalDistances')
+    ) {
+      const verticalDistances = this.otherDataForm.get('verticalDistances');
+
+      if (verticalDistances instanceof FormGroup) {
+        // Kontrollerin değerlerini diziye nesne olarak ekle
+        const distanceControls = Object.keys(verticalDistances.controls);
+        for (let i = 0; i < distanceControls.length; i++) {
+          const distanceControl = verticalDistances.get('distance_' + i);
+          if (distanceControl) {
+            inputDataArray.push({ ['distance_' + i]: distanceControl.value });
+          }
+        }
+      }
+    }
+
+    // Diziyi konsola yazdır
+    console.log(inputDataArray);
+
+    // Diğer kodlar...
   }
 
   drawRectangle(): void {
@@ -322,8 +395,8 @@ export class HomeComponent implements OnInit {
         y += roomHeight / 2;
 
         // Metnin x ve y koordinatlarına küçük bir düzeltme faktörü ekle
-        const correctionX = -2; // Bu değeri değiştirebilirsiniz
-        const correctionY = 4; // Bu değeri değiştirebilirsiniz
+        const correctionX = -2; // Bu değer değiştirilebilir
+        const correctionY = 4; // Bu değer değiştirilebilir
         x += correctionX;
         y += correctionY;
 
@@ -370,6 +443,7 @@ export class HomeComponent implements OnInit {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
+  // Fonksiyonun dönüş tipini promise olarak belirt
   fileChangeEvent(event: Event) {
     // event.target'ı HTMLInputElement olarak dönüştür
     const input = event.target as HTMLInputElement;
@@ -378,6 +452,23 @@ export class HomeComponent implements OnInit {
     // files nesnesinin boş olup olmadığını kontrol et
     if (files && files.length > 0) {
       // ilk dosyayı al
+      const file = files[0];
+
+      // Dosya içeriğini okumak için bir FileReader nesnesi oluştur
+      const reader = new FileReader();
+
+      // FileReader'ın yüklemesi tamamlandığında yapılacak işlemi tanımla
+      reader.onload = () => {
+        // Dosya içeriğini al
+        const content = reader.result as string;
+
+        // Resim adı ve içeriğini sendToServer fonksiyonuna gönder
+        this.sendToServer({ name: file.name, content: content });
+      };
+
+      // Dosya içeriğini oku
+      reader.readAsDataURL(file);
+
       const element = document.getElementById('isImageUploaded');
       element?.classList.remove('hidden');
     }
