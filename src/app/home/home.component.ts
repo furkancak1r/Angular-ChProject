@@ -11,6 +11,7 @@ export class HomeComponent implements OnInit {
   @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>;
   otherDataForm: FormGroup;
 
+  fabricCanvas: fabric.Canvas | null = null;
   constructor(private formBuilder: FormBuilder) {
     this.otherDataForm = this.formBuilder.group({
       width: null,
@@ -28,7 +29,6 @@ export class HomeComponent implements OnInit {
     this.addMaxValueListeners('height', 1000);
     this.addMaxValueListeners('horizontalLines', 1000);
     this.addMaxValueListeners('verticalLines', 1000);
-
     // Subscribe to valueChanges observable of horizontalLines form control
     this.otherDataForm
       .get('horizontalLines')
@@ -47,7 +47,9 @@ export class HomeComponent implements OnInit {
     this.otherDataForm.valueChanges.subscribe(() => {
       this.drawRectangle();
     });
+
   }
+
   addMaxValueListeners(controlName: string, maxValue: number): void {
     const control = this.otherDataForm.get(controlName);
     const inputElement = document.getElementById(controlName);
@@ -68,8 +70,12 @@ export class HomeComponent implements OnInit {
     let width = this.otherDataForm.value.width;
     let height = this.otherDataForm.value.height;
     // Create a new fabric.Canvas instance and set its dimensions
-    const fabricCanvas = new fabric.Canvas(canvas);
-    fabricCanvas.setDimensions({ width: canvas.width, height: canvas.height });
+    const canvasElement = this.canvas.nativeElement;
+    this.fabricCanvas = new fabric.Canvas(canvasElement);
+    this.fabricCanvas.setDimensions({
+      width: canvas.width,
+      height: canvas.height,
+    });
 
     // Set a minimum scale value
     const minScale = 0.5;
@@ -81,7 +87,7 @@ export class HomeComponent implements OnInit {
     scale = Math.max(minScale, scale);
 
     // Scale the canvas using the fabric.Canvas.setZoom() method
-    fabricCanvas.setZoom(scale);
+    this.fabricCanvas.setZoom(scale);
   }
 
   onSubmit(): void {
@@ -264,7 +270,7 @@ export class HomeComponent implements OnInit {
       }
     }
     verticalLines.push(width + offsetX); // Dikdörtgenin sağ kenarını ekle
-    // Oda numarasını al
+    // Oda numaralarını al
     let selectedAreaNumber = (
       document.getElementById('selectedAreaNumber') as HTMLInputElement | null
     )?.value;
@@ -329,7 +335,7 @@ export class HomeComponent implements OnInit {
         const fileInput = document.getElementById(
           'imageUpload'
         ) as HTMLInputElement;
-        if (fileInput.files && fileInput.files[0]) {
+        if (fileInput && fileInput.files && fileInput.files[0]) {
           const file = fileInput.files[0];
           const reader = new FileReader();
 
@@ -363,5 +369,19 @@ export class HomeComponent implements OnInit {
 
     // Reset canvas context
     ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  fileChangeEvent(event: Event) {
+    // event.target'ı HTMLInputElement olarak dönüştür
+    const input = event.target as HTMLInputElement;
+    // input.files özelliği bir FileList nesnesidir
+    const files = input.files;
+    // files nesnesinin boş olup olmadığını kontrol et
+    if (files && files.length > 0) {
+      // ilk dosyayı al
+        const element = document.getElementById('isImageUploaded');
+          element?.classList.remove('hidden');
+
+      }
   }
 }

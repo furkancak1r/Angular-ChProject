@@ -7,7 +7,7 @@
   "
 >
   <div class="col-md-4">
-    <canvas #canvas></canvas>
+    <canvas #canvas id="canvas"></canvas>
   </div>
   <div class="col-md-3">
     <form
@@ -63,12 +63,8 @@
 
         <ng-container
           *ngIf="
-            (otherDataForm.controls['horizontalLines'].value >= 0 &&
-              otherDataForm.controls['verticalLines'].value > 0) ||
-            (otherDataForm.controls['horizontalLines'].value > 0 &&
-              otherDataForm.controls['verticalLines'].value >= 0) ||
-            (otherDataForm.controls['horizontalLines'].value > 0 &&
-              otherDataForm.controls['verticalLines'].value > 0)
+            otherDataForm.controls['horizontalLines'].value > 0 &&
+            otherDataForm.controls['verticalLines'].value > 0
           "
         >
           <div formGroupName="horizontalDistances">
@@ -129,21 +125,22 @@
             </ng-container>
           </div>
         </ng-container>
-
-        <label class="mr-2">Resim Yüklencek Alan Numarası:</label>
-        <input
-          type="number"
-          id="selectedAreaNumber"
-          name="selectedAreaNumber"
-          class="form-control form-control-sm"
-          formControlName="selectedAreaNumber"
-        />
-
+        <div id="isImageUploaded" class="hidden">
+          <label class="mr-2">Resim Yüklencek Alan Numarası:</label>
+          <input
+            type="number"
+            id="selectedAreaNumber"
+            name="selectedAreaNumber"
+            class="form-control form-control-sm"
+            formControlName="selectedAreaNumber"
+          />
+        </div>
         <input
           class="form-control"
           type="file"
           id="imageUpload"
           accept="image/*"
+          (change)="fileChangeEvent($event)"
         />
       </ng-container>
 
