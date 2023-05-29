@@ -16,8 +16,8 @@ export class HomeComponent implements OnInit {
     this.otherDataForm = this.formBuilder.group({
       width: null,
       height: null,
-      horizontalLines: null,
-      verticalLines: null,
+      horizontalLines: [0],
+      verticalLines: [0],
       selectedAreaNumber: null,
       horizontalDistances: this.formBuilder.group({}),
       verticalDistances: this.formBuilder.group({}),
@@ -46,32 +46,6 @@ export class HomeComponent implements OnInit {
     // Subscribe to valueChanges observable of otherDataForm and call drawRectangle() method when any value changes.
     this.otherDataForm.valueChanges.subscribe(() => {
       this.drawRectangle();
-
-      if (
-        !(this.otherDataForm.controls['horizontalLines'].value === null ||
-        this.otherDataForm.controls['horizontalLines'].value === undefined)
-      ) {
-        // değer null veya undefined ise
-        const horizontalDistancesId = document.getElementById(
-          'horizontalDistancesId'
-        );
-        if (horizontalDistancesId) {
-          horizontalDistancesId.classList.remove('hidden');
-        }
-      }
-
-      if (
-        !(this.otherDataForm.controls['verticalLines'].value === null ||
-        this.otherDataForm.controls['verticalLines'].value === undefined)
-      ) {
-        // değer null veya undefined ise
-        const verticalDistancesId = document.getElementById(
-          'verticalDistancesId'
-        );
-        if (verticalDistancesId) {
-          verticalDistancesId.classList.remove('hidden');
-        }
-      }
     });
   }
 

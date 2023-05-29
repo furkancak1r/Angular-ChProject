@@ -61,8 +61,12 @@
           formControlName="verticalLines"
         />
 
-
-          <div id="horizontalDistancesId" formGroupName="horizontalDistances" class="hidden">
+        <ng-container
+          *ngIf="
+            otherDataForm.controls['horizontalLines'].value >= 0
+          "
+        >
+          <div formGroupName="horizontalDistances">
             <ng-container
               *ngFor="
                 let line of this.getLinesArray(
@@ -89,9 +93,13 @@
                 />
               </label>
             </ng-container>
-          </div>
-
-          <div id="verticalDistancesId" formGroupName="verticalDistances" class="hidden">
+          </div>  </ng-container>
+          <ng-container
+          *ngIf="
+            otherDataForm.controls['verticalLines'].value >= 0
+          "
+        >
+          <div formGroupName="verticalDistances">
             <ng-container
               *ngFor="
                 let line of this.getLinesArray(
@@ -118,18 +126,20 @@
                 />
               </label>
             </ng-container>
+          </div></ng-container>
+
+          <div id="isImageUploaded" class="hidden">
+            <label class="mr-2">Resim Yüklencek Alan Numarası:</label>
+            <input
+              type="number"
+              id="selectedAreaNumber"
+              name="selectedAreaNumber"
+              class="form-control form-control-sm"
+              formControlName="selectedAreaNumber"
+            />
           </div>
-        <div id="isImageUploaded" class="hidden">
-          <label class="mr-2">Resim Yüklencek Alan Numarası:</label>
+
           <input
-            type="number"
-            id="selectedAreaNumber"
-            name="selectedAreaNumber"
-            class="form-control form-control-sm"
-            formControlName="selectedAreaNumber"
-          />
-        </div>
-        <input
           class="form-control"
           type="file"
           id="imageUpload"
