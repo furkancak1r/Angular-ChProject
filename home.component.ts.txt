@@ -135,6 +135,75 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  sendToServer(imageData: { name: string; content: string }): void {
+    const inputData: {
+      width: string;
+      height: string;
+      horizontalLines: string;
+      selectedAreaNumber: string;
+      verticalLines: string;
+      [key: string]: string | { name: string; content: string }; // İndeks imzasını güncelledik
+    } = {
+      width:
+        (document.getElementById('width') as HTMLInputElement)?.value || '',
+      height:
+        (document.getElementById('height') as HTMLInputElement)?.value || '',
+      horizontalLines:
+        (document.getElementById('horizontalLines') as HTMLInputElement)
+          ?.value || '',
+      selectedAreaNumber:
+        (document.getElementById('selectedAreaNumber') as HTMLInputElement)
+          ?.value || '',
+      verticalLines:
+        (document.getElementById('verticalLines') as HTMLInputElement)?.value ||
+        '',
+      imageData, // imageData doğrudan atanabilir
+    };
+
+    if (
+      Number(inputData.horizontalLines) >= 0 &&
+      this.otherDataForm.get('horizontalDistances')
+    ) {
+      const horizontalDistances = this.otherDataForm.get('horizontalDistances');
+
+      if (horizontalDistances instanceof FormGroup) {
+        const distanceControls = Object.keys(horizontalDistances.controls);
+        for (let i = 0; i < distanceControls.length; i++) {
+          const distanceControl = horizontalDistances.get('distance_' + i);
+          if (distanceControl) {
+            inputData['distance_' + i] = distanceControl.value;
+          }
+        }
+      }
+    }
+
+    if (
+      Number(inputData.verticalLines) >= 0 &&
+      this.otherDataForm.get('verticalDistances')
+    ) {
+      const verticalDistances = this.otherDataForm.get('verticalDistances');
+
+      if (verticalDistances instanceof FormGroup) {
+        const distanceControls = Object.keys(verticalDistances.controls);
+        for (let i = 0; i < distanceControls.length; i++) {
+          const distanceControl = verticalDistances.get('distance_' + i);
+          if (distanceControl) {
+            inputData['distance_' + i] = distanceControl.value;
+          }
+        }
+      }
+    }
+
+    axios
+      .post('http://localhost:3000/api/images', inputData)
+      .then((response: any) => {
+        console.log('Veri sunucuya gönderildi:', response.data);
+      })
+      .catch((error: any) => {
+        console.error('Sunucuya veri gönderme hatası:', error);
+      });
+  }
+
   drawRectangle(): void {
     let width = this.otherDataForm.value.width;
     let height = this.otherDataForm.value.height;
@@ -371,119 +440,39 @@ export class HomeComponent implements OnInit {
     // Reset canvas context
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
-  fileChangeEvent = async (event: Event) => {
+
+  // Fonksiyonun dönüş tipini promise olarak belirt
+  fileChangeEvent(event: Event) {
+    // event.target'ı HTMLInputElement olarak dönüştür
     const input = event.target as HTMLInputElement;
+    // input.files özelliği bir FileList nesnesidir
     const files = input.files;
-
+    // files nesnesinin boş olup olmadığını kontrol et
     if (files && files.length > 0) {
+      // ilk dosyayı al
       const file = files[0];
-      const content = await this.readFileContent(file);
 
-      // imageData'yı bir değişkende sakla
-      this.imageData = { name: file.name, content: content };
+      // Dosya içeriğini okumak için bir FileReader nesnesi oluştur
+      const reader = new FileReader();
+
+      // FileReader'ın yüklemesi tamamlandığında yapılacak işlemi tanımla
+      reader.onload = () => {
+        // Dosya içeriğini al
+        const content = reader.result as string;
+        const sendButton = document.getElementById('send-button');
+        sendButton?.addEventListener('click', () => {
+          if (file.name) {
+            this.sendToServer({ name: file.name, content: content });
+          }
+        });
+        // Resim adı ve içeriğini sendToServer fonksiyonuna gönder
+      };
+
+      // Dosya içeriğini oku
+      reader.readAsDataURL(file);
 
       const element = document.getElementById('isImageUploaded');
       element?.classList.remove('hidden');
     }
-  };
-
-  readFileContent = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        const content = reader.result as string;
-        resolve(content);
-      };
-
-      reader.onerror = (error) => {
-        reject(error);
-      };
-
-      reader.readAsDataURL(file);
-    });
-  };
-
-  sendToServer = async (): Promise<void> => {
-    const inputData: {
-      width: string;
-      height: string;
-      horizontalLines: string;
-      selectedAreaNumber: string;
-      verticalLines: string;
-      imageData: { name: string; content: string };
-      horizontalDistances: string[]; // String tipinde bir yatay mesafe dizisi tanımla
-      verticalDistances: string[]; // String tipinde bir dikey mesafe dizisi tanımla
-    } = {
-      width:
-        (document.getElementById('width') as HTMLInputElement)?.value || '',
-      height:
-        (document.getElementById('height') as HTMLInputElement)?.value || '',
-      horizontalLines:
-        (document.getElementById('horizontalLines') as HTMLInputElement)
-          ?.value || '',
-      selectedAreaNumber:
-        (document.getElementById('selectedAreaNumber') as HTMLInputElement)
-          ?.value || '',
-      verticalLines:
-        (document.getElementById('verticalLines') as HTMLInputElement)?.value ||
-        '',
-      ['imageData']: this.imageData, // imageData'ya index signature ile erişim sağla
-      horizontalDistances: [], // Boş bir yatay mesafe dizisi oluştur
-      verticalDistances: [], // Boş bir dikey mesafe dizisi oluştur
-    };
-
-    if (
-      Number(inputData.horizontalLines) >= 0 &&
-      this.otherDataForm.get('horizontalDistances')
-    ) {
-      const horizontalDistances = this.otherDataForm.get('horizontalDistances');
-
-      if (horizontalDistances instanceof FormGroup) {
-        const distanceControls = Object.keys(horizontalDistances.controls);
-        for (let i = 0; i < distanceControls.length; i++) {
-          const distanceControl = horizontalDistances.get('distance_' + i);
-          if (distanceControl) {
-            inputData.horizontalDistances.push(distanceControl.value); // Yatay mesafe dizisine ekle
-          }
-        }
-      }
-    }
-
-    if (
-      Number(inputData.verticalLines) >= 0 &&
-      this.otherDataForm.get('verticalDistances')
-    ) {
-      const verticalDistances = this.otherDataForm.get('verticalDistances');
-
-      if (verticalDistances instanceof FormGroup) {
-        const distanceControls = Object.keys(verticalDistances.controls);
-        for (let i = 0; i < distanceControls.length; i++) {
-          const distanceControl = verticalDistances.get('distance_' + i);
-          if (distanceControl) {
-            inputData.verticalDistances.push(distanceControl.value); // Dikey mesafe dizisine ekle
-          }
-        }
-      }
-    }
-
-    const image = inputData['imageData'] as { name: string; content: string };
-    if (!image || !image.name || !image.content) {
-      console.log('Resim bilgileri eksik. İstek gönderilemedi.');
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-      'http://localhost:3000/api/images',
-      inputData
-      );
-      console.log('Veri sunucuya gönderildi:', response.data);
-      alert('Veri başarıyla kaydedildi'); // Kaydetme başarılı ise alert göster
-      } catch (error) {
-      console.error('Sunucuya veri gönderme hatası:', error);
-      alert('Kaydederken sorun oluştu'); // Kaydetme başarısız ise alert göster
-      }
-
-  };
+  }
 }
