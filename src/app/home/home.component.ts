@@ -2,6 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import axios from 'axios';
 import { fabric } from 'fabric';
+import { ImageService } from '../image.service';
 
 @Component({
   selector: 'app-home',
@@ -12,9 +13,12 @@ export class HomeComponent implements OnInit {
   @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>;
   otherDataForm: FormGroup;
   imageData!: { name: string; content: string };
-
+  images: any[] = [];
   fabricCanvas: fabric.Canvas | null = null;
-  constructor(private formBuilder: FormBuilder) {
+  constructor(
+    private formBuilder: FormBuilder,
+    private imageService: ImageService
+  ) {
     this.otherDataForm = this.formBuilder.group({
       width: null,
       height: null,
@@ -50,7 +54,19 @@ export class HomeComponent implements OnInit {
       this.drawRectangle();
     });
   }
+  loadImages() {
+    const table = document.getElementById('table');
+    table?.classList.remove('hidden');
 
+    this.imageService.getImages().subscribe(
+      (data) => {
+        this.images = data;
+      },
+      (error) => {
+        console.error('Veri alma hatası:', error);
+      }
+    );
+  }
   addMaxValueListeners(controlName: string, maxValue: number): void {
     const control = this.otherDataForm.get(controlName);
     const inputElement = document.getElementById(controlName);
@@ -475,15 +491,14 @@ export class HomeComponent implements OnInit {
 
     try {
       const response = await axios.post(
-      'http://localhost:3000/api/images',
-      inputData
+        'http://localhost:3000/api/images',
+        inputData
       );
       console.log('Veri sunucuya gönderildi:', response.data);
-      alert('Veri başarıyla kaydedildi'); // Kaydetme başarılı ise alert göster
-      } catch (error) {
+      alert('Veriler başarıyla kaydedildi'); // Kaydetme başarılı ise alert göster
+    } catch (error) {
       console.error('Sunucuya veri gönderme hatası:', error);
       alert('Kaydederken sorun oluştu'); // Kaydetme başarısız ise alert göster
-      }
-
+    }
   };
 }

@@ -145,16 +145,49 @@
         />
       </ng-container>
 
-      <button type="submit" class="btn btn-primary">Temizle</button>
+      <button style="margin-left: 0px" type="submit" class="btn btn-danger">
+        Temizle
+      </button>
 
-      <button id="send-button" class="btn btn-primary" (click)="sendToServer()">Kaydet</button>
+      <button id="send-button" class="btn btn-success" (click)="sendToServer()">
+        Kaydet
+      </button>
+      <button class="btn btn-success" (click)="loadImages()">
+        Kaydedilenleri Getir
+      </button>
 
       <a
-        href="https://github.com/furkancak1r/ChProject_Angular.git"
+        href="https://github.com/users/furkancak1r/projects/1"
         target="_blank"
-        class="btn btn-success"
+        class="btn btn-primary"
         >Github'a Git</a
       >
     </form>
   </div>
 </div>
+
+<table id="table" class="table hidden">
+  <thead>
+    <tr>
+      <th scope="col">Width</th>
+      <th scope="col">Height</th>
+      <th scope="col">Horizontal Lines</th>
+      <th scope="col">Selected Area Number</th>
+      <th scope="col">Vertical Lines</th>
+      <th scope="col">Horizontal Distances</th>
+      <th scope="col">Vertical Distances</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let image of images">
+      <button id="`index_i`"></button>
+      <td>{{ image.width }}</td>
+      <td>{{ image.height }}</td>
+      <td>{{ image.horizontalLines }}</td>
+      <td>{{ image.selectedAreaNumber }}</td>
+      <td>{{ image.verticalLines }}</td>
+      <td>{{ image.horizontalDistances }}</td>
+      <td>{{ image.verticalDistances }}</td>
+    </tr>
+  </tbody>
+</table>
