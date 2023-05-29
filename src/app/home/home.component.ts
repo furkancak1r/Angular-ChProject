@@ -67,6 +67,34 @@ export class HomeComponent implements OnInit {
       }
     );
   }
+
+  // Fonksiyonu bileşeninizin içerisinde uygun bir yerde tanımlayın
+  get(image: any) {
+    // Resim verilerini JSON formatına dönüştür
+
+    // İlgili form kontrol gruplarını alın
+    const widthControl = this.otherDataForm.get('width');
+    const heightControl = this.otherDataForm.get('height');
+    const horizontalLinesControl = this.otherDataForm.get('horizontalLines');
+    const selectedAreaNumberControl =
+      this.otherDataForm.get('selectedAreaNumber');
+    const verticalLinesControl = this.otherDataForm.get('verticalLines');
+
+    const verticalDistancesControl =
+      this.otherDataForm.get('verticalDistances');
+    const horizontalDistancesControl = this.otherDataForm.get(
+      'horizontalDistances'
+    );
+    // İlgili form kontrol gruplarına resim verilerini doldurun
+    widthControl?.setValue(image.width);
+    heightControl?.setValue(image.height);
+    horizontalLinesControl?.setValue(image.horizontalLines);
+    selectedAreaNumberControl?.setValue(image.selectedAreaNumber);
+    verticalLinesControl?.setValue(image.verticalLines);
+    horizontalDistancesControl?.setValue(image.horizontalDistances);
+    verticalDistancesControl?.setValue(image.verticalDistances);
+  }
+
   addMaxValueListeners(controlName: string, maxValue: number): void {
     const control = this.otherDataForm.get(controlName);
     const inputElement = document.getElementById(controlName);

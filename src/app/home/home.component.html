@@ -169,6 +169,7 @@
 <table id="table" class="table hidden">
   <thead>
     <tr>
+      <th scope="col">Get</th>
       <th scope="col">Width</th>
       <th scope="col">Height</th>
       <th scope="col">Horizontal Lines</th>
@@ -179,8 +180,10 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let image of images">
-      <button id="`index_i`"></button>
+    <tr *ngFor="let image of images; let i = index">
+      <td>
+        <button id="{{'index_' + i}}" (click)="get(image)">Get</button>
+      </td>
       <td>{{ image.width }}</td>
       <td>{{ image.height }}</td>
       <td>{{ image.horizontalLines }}</td>
