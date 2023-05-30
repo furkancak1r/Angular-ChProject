@@ -20,11 +20,11 @@ export class HomeComponent implements OnInit {
     private imageService: ImageService
   ) {
     this.otherDataForm = this.formBuilder.group({
-      width: null,
-      height: null,
+      width: Number,
+      height: Number,
       horizontalLines: [0],
       verticalLines: [0],
-      selectedAreaNumber: null,
+      selectedAreaNumber: Number,
       horizontalDistances: this.formBuilder.group({}),
       verticalDistances: this.formBuilder.group({}),
     });
@@ -119,11 +119,11 @@ export class HomeComponent implements OnInit {
       'horizontalDistances'
     );
     // İlgili form kontrol gruplarına resim verilerini doldurun
-    widthControl?.setValue(image.width);
-    heightControl?.setValue(image.height);
-    horizontalLinesControl?.setValue(image.horizontalLines);
-    selectedAreaNumberControl?.setValue(image.selectedAreaNumber);
-    verticalLinesControl?.setValue(image.verticalLines);
+    widthControl?.patchValue(image.width);
+    heightControl?.patchValue(image.height);
+    horizontalLinesControl?.patchValue(image.horizontalLines);
+    selectedAreaNumberControl?.patchValue(image.selectedAreaNumber);
+    verticalLinesControl?.patchValue(image.verticalLines);
 
     for (let i = 0; i < image.horizontalDistances.length; i++) {
       const distanceControl = horizontalDistancesControl?.get('distance_' + i);
@@ -138,7 +138,11 @@ export class HomeComponent implements OnInit {
         distanceControl.setValue(image.verticalDistances[i]);
       }
     }
+
+    // Call drawRectangle() method to update the canvas
+    this.drawRectangle();
   }
+
   addMaxValueListeners(controlName: string, maxValue: number) {
     this.otherDataForm.get(controlName)?.valueChanges.subscribe((value) => {
       if (value > maxValue) {
@@ -222,12 +226,12 @@ export class HomeComponent implements OnInit {
       verticalDistancesForm.addControl('distance_' + i, new FormControl(null));
     }
   }
-
   drawRectangle(): void {
-    let width = this.otherDataForm.value.width;
-    let height = this.otherDataForm.value.height;
+    let width = Number(this.otherDataForm.value.width); // Number() fonksiyonu eklendi
+    let height = Number(this.otherDataForm.value.height); // Number() fonksiyonu eklendi
     const horizontalDistances = this.otherDataForm.value.horizontalDistances;
     const verticalDistances = this.otherDataForm.value.verticalDistances;
+
     if (!width || !height) return;
     const canvas = this.canvas.nativeElement;
     const ctx = canvas.getContext('2d');
@@ -305,7 +309,7 @@ export class HomeComponent implements OnInit {
     // Yatay çizgileri ve koordinatlarını çiz
     let currentY = offsetY;
     for (const key in horizontalDistances) {
-      const distance = horizontalDistances[key];
+      const distance = Number(horizontalDistances[key]);
       if (distance !== null) {
         currentY += distance;
         const isBeyondBounds = currentY > height + offsetY;
@@ -319,6 +323,7 @@ export class HomeComponent implements OnInit {
           width + Math.max(20, textWidth) + offsetX,
           (canvas.width - textWidth - 10) / scale
         );
+
         ctx.fillStyle = isBeyondBounds ? 'red' : 'black';
         ctx.fillText(`${distance}mm`, textX, currentY);
 
@@ -331,7 +336,7 @@ export class HomeComponent implements OnInit {
     // Dikey çizgileri ve koordinatlarını çiz
     let currentX = offsetX;
     for (const key in verticalDistances) {
-      const distance = verticalDistances[key];
+      const distance = Number(verticalDistances[key]);
       if (distance !== null) {
         currentX += distance;
         const isBeyondBounds = currentX > width + offsetX;
@@ -359,10 +364,12 @@ export class HomeComponent implements OnInit {
       }
     }
     verticalLines.push(width + offsetX); // Dikdörtgenin sağ kenarını ekle
+
     // Oda numaralarını al
-    let selectedAreaNumber = (
-      document.getElementById('selectedAreaNumber') as HTMLInputElement | null
-    )?.value;
+    let selectedAreaNumber = Number(
+      (document.getElementById('selectedAreaNumber') as HTMLInputElement | null)
+        ?.value
+    );
 
     // Her oda için bir numara yaz
     let roomNumber = 1; // Oda numarasını tutan değişken
@@ -375,10 +382,9 @@ export class HomeComponent implements OnInit {
       for (let j = 0; j < verticalLines.length - 1; j++) {
         // Son elemanı atla
         // Oda numarasını metin olarak al
-        const number = roomNumber.toString();
-
+        const number = roomNumber;
         // Metnin genişliğini ve yüksekliğini ölç
-        const textWidth = ctx.measureText(number).width;
+        const textWidth = 8.8984375;
         const textHeight = parseInt(ctx.font);
 
         // Metnin yazılacağı x ve y koordinatlarını hesapla
@@ -397,6 +403,7 @@ export class HomeComponent implements OnInit {
         // Oda genişliğini ve yüksekliğini hesapla
         const roomWidth = verticalLines[j + 1] - verticalLines[j];
         const roomHeight = horizontalLines[i + 1] - horizontalLines[i];
+
         // Eğer oda numarası seçilen oda numarasına eşitse, x ve y koordinatlarını ve genişlik ve yüksekliği kaydet
         if (number === selectedAreaNumber) {
           // selectedAreaX değerini dikey çizginin x koordinatı olarak ata
@@ -418,7 +425,7 @@ export class HomeComponent implements OnInit {
         y += correctionY;
 
         // Metni yaz
-        ctx.fillText(number, x, y);
+        ctx.fillText(number.toString(), x, y);
 
         // Upload edilen resmi canvas üzerine çiz
         const fileInput = document.getElementById(
@@ -459,6 +466,7 @@ export class HomeComponent implements OnInit {
     // Reset canvas context
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
+
   fileChangeEvent = async (event: Event) => {
     const input = event.target as HTMLInputElement;
     const files = input.files;
