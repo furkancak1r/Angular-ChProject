@@ -2,7 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import axios from 'axios';
 import { fabric } from 'fabric';
-import { ImageService } from '../image.service';
+import { ImageService } from '../services/ImageService/image.service';
 
 @Component({
   selector: 'app-home',

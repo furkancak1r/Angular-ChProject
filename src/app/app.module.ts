@@ -9,7 +9,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgChartsModule } from 'ng2-charts';
 
 import { FabricModule } from 'ngx-fabric-wrapper';
-
 @NgModule({
   declarations: [
     AppComponent,
