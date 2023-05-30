@@ -61,47 +61,61 @@
           formControlName="verticalLines"
         />
 
-<!-- Yatay Mesafeler -->
-<ng-container *ngIf="otherDataForm.controls['horizontalLines'].value >= 0">
-  <div formGroupName="horizontalDistances">
-    <ng-container *ngFor="let control of horizontalDistances.controls | keyvalue">
-      <label>
-        {{
-          control.key === 'distance_0'
-            ? "Yataydaki 1. çizginin dikdörtgen ile arasındaki mesafe kaç mm olmalı:"
-            : "Yataydaki " + (parseInt(control.key.replace('distance_', '')) + 1) + ". çizginin " + parseInt(control.key.replace('distance_', '')) + ". çizgi ile arasındaki mesafe kaç mm olmalı:"
-        }}
-        <input
-          type="number"
-          [formControlName]="control.key"
-          class="form-control form-control-sm"
-        />
-      </label>
-    </ng-container>
-  </div>
-</ng-container>
+        <!-- Yatay Mesafeler -->
+        <ng-container
+          *ngIf="otherDataForm.controls['horizontalLines'].value >= 0"
+        >
+          <div formGroupName="horizontalDistances">
+            <ng-container
+              *ngFor="let control of horizontalDistances.controls | keyvalue"
+            >
+              <label>
+                {{
+                  control.key === "distance_0"
+                    ? "Yataydaki 1. çizginin dikdörtgen ile arasındaki mesafe kaç mm olmalı:"
+                    : "Yataydaki " +
+                      (parseInt(control.key.replace("distance_", "")) + 1) +
+                      ". çizginin " +
+                      parseInt(control.key.replace("distance_", "")) +
+                      ". çizgi ile arasındaki mesafe kaç mm olmalı:"
+                }}
+                <input
+                  type="number"
+                  [formControlName]="control.key"
+                  class="form-control form-control-sm"
+                />
+              </label>
+            </ng-container>
+          </div>
+        </ng-container>
 
-<!-- Dikey Mesafeler -->
-<ng-container *ngIf="otherDataForm.controls['verticalLines'].value >= 0">
-  <div formGroupName="verticalDistances">
-    <ng-container *ngFor="let control of verticalDistances.controls | keyvalue">
-      <label>
-        {{
-          control.key === 'distance_0'
-            ? "Dikeyde 1. çizginin dikdörtgen ile arasındaki mesafe kaç mm olmalı:"
-            : "Dikeyde " + (parseInt(control.key.replace('distance_', '')) + 1) + ". çizginin " + parseInt(control.key.replace('distance_', '')) + ". çizgi ile arasındaki mesafe kaç mm olmalı:"
-        }}
-        <input
-          type="number"
-          [formControlName]="control.key"
-          class="form-control form-control-sm"
-        />
-      </label>
-    </ng-container>
-  </div>
-</ng-container>
-
-
+        <!-- Dikey Mesafeler -->
+        <ng-container
+          *ngIf="otherDataForm.controls['verticalLines'].value >= 0"
+        >
+          <div formGroupName="verticalDistances">
+            <ng-container
+              *ngFor="let control of verticalDistances.controls | keyvalue"
+            >
+              <label>
+                {{
+                  control.key === "distance_0"
+                    ? "Dikeyde 1. çizginin dikdörtgen ile arasındaki mesafe kaç mm olmalı:"
+                    : "Dikeyde " +
+                      (parseInt(control.key.replace("distance_", "")) + 1) +
+                      ". çizginin " +
+                      parseInt(control.key.replace("distance_", "")) +
+                      ". çizgi ile arasındaki mesafe kaç mm olmalı:"
+                }}
+                <input
+                  type="number"
+                  [formControlName]="control.key"
+                  class="form-control form-control-sm"
+                />
+              </label>
+            </ng-container>
+          </div>
+        </ng-container>
 
         <div id="isImageUploaded" class="hidden">
           <label class="mr-2">Resim Yüklencek Alan Numarası:</label>
@@ -147,7 +161,7 @@
 <table id="table" class="table hidden">
   <thead>
     <tr>
-      <th scope="col">Get</th>
+      <th scope="col">Get Button</th>
       <th scope="col">Width</th>
       <th scope="col">Height</th>
       <th scope="col">Horizontal Lines</th>
@@ -155,6 +169,8 @@
       <th scope="col">Vertical Lines</th>
       <th scope="col">Horizontal Distances</th>
       <th scope="col">Vertical Distances</th>
+      <th scope="col">Image Names</th>
+
     </tr>
   </thead>
   <tbody>
@@ -169,6 +185,8 @@
       <td>{{ image.verticalLines }}</td>
       <td>{{ image.horizontalDistances }}</td>
       <td>{{ image.verticalDistances }}</td>
+      <td>{{ image.imageData.name }}</td>
+
     </tr>
   </tbody>
 </table>

@@ -26,7 +26,7 @@ export class HomeComponent implements OnInit {
       verticalLines: [0],
       selectedAreaNumber: null,
       horizontalDistances: this.formBuilder.group({}),
-      verticalDistances: this.formBuilder.group({})
+      verticalDistances: this.formBuilder.group({}),
     });
   }
 
@@ -37,9 +37,11 @@ export class HomeComponent implements OnInit {
     this.addMaxValueListeners('verticalLines', 1000);
 
     // Subscribe to valueChanges observable of horizontalLines form control
-    this.otherDataForm.get('horizontalLines')?.valueChanges.subscribe((value) => {
-      this.addHorizontalDistances(value);
-    });
+    this.otherDataForm
+      .get('horizontalLines')
+      ?.valueChanges.subscribe((value) => {
+        this.addHorizontalDistances(value);
+      });
 
     // Subscribe to valueChanges observable of verticalLines form control
     this.otherDataForm.get('verticalLines')?.valueChanges.subscribe((value) => {
@@ -52,10 +54,10 @@ export class HomeComponent implements OnInit {
     });
   }
 
-
-
   createHorizontalDistancesControls(count: number) {
-    const horizontalDistancesForm = this.otherDataForm.get('horizontalDistances') as FormGroup;
+    const horizontalDistancesForm = this.otherDataForm.get(
+      'horizontalDistances'
+    ) as FormGroup;
 
     // Mevcut alanları temizle
     Object.keys(horizontalDistancesForm.controls).forEach((key) => {
@@ -63,12 +65,17 @@ export class HomeComponent implements OnInit {
     });
 
     for (let i = 0; i < count; i++) {
-      horizontalDistancesForm.addControl('distance_' + i, new FormControl(null));
+      horizontalDistancesForm.addControl(
+        'distance_' + i,
+        new FormControl(null)
+      );
     }
   }
 
   createVerticalDistancesControls(count: number) {
-    const verticalDistancesForm = this.otherDataForm.get('verticalDistances') as FormGroup;
+    const verticalDistancesForm = this.otherDataForm.get(
+      'verticalDistances'
+    ) as FormGroup;
 
     // Mevcut alanları temizle
     Object.keys(verticalDistancesForm.controls).forEach((key) => {
@@ -78,15 +85,6 @@ export class HomeComponent implements OnInit {
     for (let i = 0; i < count; i++) {
       verticalDistancesForm.addControl('distance_' + i, new FormControl(null));
     }
-  }
-
-
-  get horizontalLines() {
-    return this.otherDataForm.get('horizontalLines') as FormArray;
-  }
-
-  get verticalLines() {
-    return this.otherDataForm.get('verticalLines') as FormArray;
   }
 
   loadImages() {
@@ -126,10 +124,21 @@ export class HomeComponent implements OnInit {
     horizontalLinesControl?.setValue(image.horizontalLines);
     selectedAreaNumberControl?.setValue(image.selectedAreaNumber);
     verticalLinesControl?.setValue(image.verticalLines);
-    horizontalDistancesControl?.setValue(image.horizontalDistances);
-    verticalDistancesControl?.setValue(image.verticalDistances);
-  }
 
+    for (let i = 0; i < image.horizontalDistances.length; i++) {
+      const distanceControl = horizontalDistancesControl?.get('distance_' + i);
+      if (distanceControl) {
+        distanceControl.setValue(image.horizontalDistances[i]);
+      }
+    }
+
+    for (let i = 0; i < image.verticalDistances.length; i++) {
+      const distanceControl = verticalDistancesControl?.get('distance_' + i);
+      if (distanceControl) {
+        distanceControl.setValue(image.verticalDistances[i]);
+      }
+    }
+  }
   addMaxValueListeners(controlName: string, maxValue: number) {
     this.otherDataForm.get(controlName)?.valueChanges.subscribe((value) => {
       if (value > maxValue) {
@@ -184,19 +193,26 @@ export class HomeComponent implements OnInit {
       .map((_, index) => index + 1);
   }
   addHorizontalDistances(count: number) {
-    const horizontalDistancesForm = this.otherDataForm.get('horizontalDistances') as FormGroup;
+    const horizontalDistancesForm = this.otherDataForm.get(
+      'horizontalDistances'
+    ) as FormGroup;
     const controls = horizontalDistancesForm.controls;
     Object.keys(controls).forEach((key) => {
       horizontalDistancesForm.removeControl(key);
     });
 
     for (let i = 0; i < count; i++) {
-      horizontalDistancesForm.addControl('distance_' + i, new FormControl(null));
+      horizontalDistancesForm.addControl(
+        'distance_' + i,
+        new FormControl(null)
+      );
     }
   }
 
   addVerticalDistances(count: number) {
-    const verticalDistancesForm = this.otherDataForm.get('verticalDistances') as FormGroup;
+    const verticalDistancesForm = this.otherDataForm.get(
+      'verticalDistances'
+    ) as FormGroup;
     const controls = verticalDistancesForm.controls;
     Object.keys(controls).forEach((key) => {
       verticalDistancesForm.removeControl(key);
@@ -206,7 +222,6 @@ export class HomeComponent implements OnInit {
       verticalDistancesForm.addControl('distance_' + i, new FormControl(null));
     }
   }
-
 
   drawRectangle(): void {
     let width = this.otherDataForm.value.width;
