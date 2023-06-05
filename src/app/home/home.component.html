@@ -141,7 +141,7 @@
         Temizle
       </button>
 
-      <button id="send-button" class="btn btn-success" (click)="sendToServer()">
+      <button id="send-button" class="btn btn-success" (click)="sendToServer($event)">
         Kaydet
       </button>
       <button class="btn btn-success" (click)="loadImages()">
@@ -149,6 +149,7 @@
       </button>
 
       <a
+        style="margin-left: 0px"
         href="https://github.com/users/furkancak1r/projects/1"
         target="_blank"
         class="btn btn-primary"
@@ -170,7 +171,6 @@
       <th scope="col">Horizontal Distances</th>
       <th scope="col">Vertical Distances</th>
       <th scope="col">Image Names</th>
-
     </tr>
   </thead>
   <tbody>
@@ -186,7 +186,6 @@
       <td>{{ image.horizontalDistances }}</td>
       <td>{{ image.verticalDistances }}</td>
       <td>{{ image.imageData.name }}</td>
-
     </tr>
   </tbody>
 </table>

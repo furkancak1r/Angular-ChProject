@@ -15,6 +15,8 @@ export class HomeComponent implements OnInit {
   imageData!: { name: string; content: string };
   images: any[] = [];
   fabricCanvas: fabric.Canvas | null = null;
+  file!: File; // File tipinde bir de
+  imageBase64!: string;
   constructor(
     private formBuilder: FormBuilder,
     private imageService: ImageService
@@ -94,6 +96,14 @@ export class HomeComponent implements OnInit {
     this.imageService.getImages().subscribe(
       (data) => {
         this.images = data;
+        // Sayfayı 100 piksel aşağı kaydır
+        // Sayfanın en altına git
+        // Sayfa yüklendikten sonra çalışacak kod
+        // Belirli bir süre sonra kaydırma işlemini gerçekleştir
+        setTimeout(function () {
+          // Sayfanın en altına kaydır
+          window.scrollTo(0, document.body.scrollHeight);
+        }, 1000); // 1 saniye bekleme süresi
       },
       (error) => {
         console.error('Veri alma hatası:', error);
@@ -466,30 +476,36 @@ export class HomeComponent implements OnInit {
     // Reset canvas context
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
-
   fileChangeEvent = async (event: Event) => {
     const input = event.target as HTMLInputElement;
     const files = input.files;
 
     if (files && files.length > 0) {
       const file = files[0];
-      const content = await this.readFileContent(file);
+      this.file = file;
 
-      // imageData'yı bir değişkende sakla
-      this.imageData = { name: file.name, content: content };
+      // Dosyayı base64 formatına dönüştürme fonksiyonunu çağır
+      const fileBase64 = await this.readFileAsBase64(file);
+      console.log('fileBase64', fileBase64);
+
+      // Base64 formatındaki dosyayı this.imageBase64'e eşitle
+      this.imageBase64 = fileBase64;
 
       const element = document.getElementById('isImageUploaded');
-      element?.classList.remove('hidden');
+      if (element) {
+        element.classList.remove('hidden');
+      }
     }
   };
 
-  readFileContent = (file: File): Promise<string> => {
+  // Dosyayı base64 formatına dönüştürme fonksiyonu
+  readFileAsBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-
       reader.onload = () => {
-        const content = reader.result as string;
-        resolve(content);
+        const base64String = reader.result as string;
+        const fileBase64 = base64String.split(',')[1]; // Base64 veri kısmını al
+        resolve(fileBase64);
       };
 
       reader.onerror = (error) => {
@@ -500,85 +516,94 @@ export class HomeComponent implements OnInit {
     });
   };
 
-  sendToServer = async (): Promise<void> => {
-    const inputData: {
-      width: string;
-      height: string;
-      horizontalLines: string;
-      selectedAreaNumber: string;
-      verticalLines: string;
-      imageData: { name: string; content: string };
-      horizontalDistances: string[]; // String tipinde bir yatay mesafe dizisi tanımla
-      verticalDistances: string[]; // String tipinde bir dikey mesafe dizisi tanımla
-    } = {
-      width:
-        (document.getElementById('width') as HTMLInputElement)?.value || '',
-      height:
-        (document.getElementById('height') as HTMLInputElement)?.value || '',
-      horizontalLines:
-        (document.getElementById('horizontalLines') as HTMLInputElement)
-          ?.value || '',
-      selectedAreaNumber:
-        (document.getElementById('selectedAreaNumber') as HTMLInputElement)
-          ?.value || '',
-      verticalLines:
-        (document.getElementById('verticalLines') as HTMLInputElement)?.value ||
-        '',
-      ['imageData']: this.imageData, // imageData'ya index signature ile erişim sağla
-      horizontalDistances: [], // Boş bir yatay mesafe dizisi oluştur
-      verticalDistances: [], // Boş bir dikey mesafe dizisi oluştur
-    };
+  // Diğer kodlar...
+  sendToServer = async (event: Event) => {
+    // Girdi verilerini al
+    const width =
+      (document.getElementById('width') as HTMLInputElement)?.value || '';
+    const height =
+      (document.getElementById('height') as HTMLInputElement)?.value || '';
+    const horizontalLines =
+      (document.getElementById('horizontalLines') as HTMLInputElement)?.value ||
+      '';
+    const selectedAreaNumber =
+      (document.getElementById('selectedAreaNumber') as HTMLInputElement)
+        ?.value || '';
+    const verticalLines =
+      (document.getElementById('verticalLines') as HTMLInputElement)?.value ||
+      '';
 
-    if (
-      Number(inputData.horizontalLines) >= 0 &&
-      this.otherDataForm.get('horizontalDistances')
-    ) {
-      const horizontalDistances = this.otherDataForm.get('horizontalDistances');
-
-      if (horizontalDistances instanceof FormGroup) {
-        const distanceControls = Object.keys(horizontalDistances.controls);
-        for (let i = 0; i < distanceControls.length; i++) {
-          const distanceControl = horizontalDistances.get('distance_' + i);
-          if (distanceControl) {
-            inputData.horizontalDistances.push(distanceControl.value); // Yatay mesafe dizisine ekle
-          }
-        }
-      }
-    }
-
-    if (
-      Number(inputData.verticalLines) >= 0 &&
-      this.otherDataForm.get('verticalDistances')
-    ) {
-      const verticalDistances = this.otherDataForm.get('verticalDistances');
-
-      if (verticalDistances instanceof FormGroup) {
-        const distanceControls = Object.keys(verticalDistances.controls);
-        for (let i = 0; i < distanceControls.length; i++) {
-          const distanceControl = verticalDistances.get('distance_' + i);
-          if (distanceControl) {
-            inputData.verticalDistances.push(distanceControl.value); // Dikey mesafe dizisine ekle
-          }
-        }
-      }
-    }
-
-    const image = inputData['imageData'] as { name: string; content: string };
-    if (!image || !image.name || !image.content) {
-      console.log('Resim bilgileri eksik. İstek gönderilemedi.');
+    let file = this.file;
+    if (!file) {
+      console.log('sendToServerfile:', file);
+      alert('Lütfen bir dosya seçin');
       return;
     }
+    const fileName = file.name;
 
+    // Dosyayı Base64 formatına dönüştür
+    const fileBase64 = this.imageBase64;
+    console.log('fileBase64', fileBase64);
+    const horizontalDistances: string[] = [];
+    const verticalDistances: string[] = [];
+
+    // Yatay mesafeleri diziye ekle
+    if (
+      Number(horizontalLines) >= 0 &&
+      this.otherDataForm?.get('horizontalDistances')
+    ) {
+      const horizontalDistancesForm = this.otherDataForm.get(
+        'horizontalDistances'
+      );
+      if (horizontalDistancesForm instanceof FormGroup) {
+        const distanceControls = Object.keys(horizontalDistancesForm.controls);
+        for (let i = 0; i < distanceControls.length; i++) {
+          const distanceControl = horizontalDistancesForm.get('distance_' + i);
+          if (distanceControl) {
+            horizontalDistances.push(distanceControl.value);
+          }
+        }
+      }
+    }
+
+    // Dikey mesafeleri diziye ekle
+    if (
+      Number(verticalLines) >= 0 &&
+      this.otherDataForm?.get('verticalDistances')
+    ) {
+      const verticalDistancesForm = this.otherDataForm.get('verticalDistances');
+      if (verticalDistancesForm instanceof FormGroup) {
+        const distanceControls = Object.keys(verticalDistancesForm.controls);
+        for (let i = 0; i < distanceControls.length; i++) {
+          const distanceControl = verticalDistancesForm.get('distance_' + i);
+          if (distanceControl) {
+            verticalDistances.push(distanceControl.value);
+          }
+        }
+      }
+    }
+
+    // Sunucuya post isteği gönder
     try {
       const response = await axios.post(
-        'http://localhost:3000/api/images',
-        inputData
+        'http://localhost:3000/api_chproject/post/images',
+        {
+          fileName,
+          width,
+          height,
+          horizontalLines,
+          selectedAreaNumber,
+          verticalLines,
+          fileBase64,
+          horizontalDistances,
+          verticalDistances,
+        }
       );
       console.log('Veri sunucuya gönderildi:', response.data);
-      alert('Veriler başarıyla kaydedildi'); // Kaydetme başarılı ise alert göster
+      alert('Veriler başarıyla kaydedildi');
     } catch (error) {
       console.error('Sunucuya veri gönderme hatası:', error);
-      alert('Kaydederken sorun oluştu'); // Kaydetme başarısız ise alert göster
+      alert('Kaydederken sorun oluştu');
     }
   };
   get horizontalDistances() {
