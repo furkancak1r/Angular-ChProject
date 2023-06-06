@@ -95,6 +95,7 @@ export class HomeComponent implements OnInit {
     this.imageService.getImages().subscribe(
       (data) => {
         this.images = data;
+        console.log(this.images);
         // Sayfayı 100 piksel aşağı kaydır
         // Sayfanın en altına git
         // Sayfa yüklendikten sonra çalışacak kod
@@ -151,6 +152,7 @@ export class HomeComponent implements OnInit {
     // Call drawRectangle() method to update the canvas
     this.drawRectangle();
   }
+
 
   addMaxValueListeners(controlName: string, maxValue: number) {
     this.otherDataForm.get(controlName)?.valueChanges.subscribe((value) => {
