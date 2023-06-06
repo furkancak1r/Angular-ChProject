@@ -12,7 +12,6 @@ import { ImageService } from '../services/ImageService/image.service';
 export class HomeComponent implements OnInit {
   @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>;
   otherDataForm: FormGroup;
-  imageData!: { name: string; content: string };
   images: any[] = [];
   fabricCanvas: fabric.Canvas | null = null;
   file!: File; // File tipinde bir de
