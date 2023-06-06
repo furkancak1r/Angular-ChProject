@@ -3,6 +3,8 @@ import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import axios from 'axios';
 import { fabric } from 'fabric';
 import { ImageService } from '../services/ImageService/image.service';
+import { FileService } from '../services/FileService/file.service';
+import { Buffer } from 'buffer';
 
 @Component({
   selector: 'app-home',
@@ -16,9 +18,11 @@ export class HomeComponent implements OnInit {
   fabricCanvas: fabric.Canvas | null = null;
   file!: File; // File tipinde bir de
   imageBase64!: string;
+  fileContent!: string;
   constructor(
     private formBuilder: FormBuilder,
-    private imageService: ImageService
+    private imageService: ImageService,
+    private fileService: FileService
   ) {
     this.otherDataForm = this.formBuilder.group({
       width: Number,
@@ -112,9 +116,15 @@ export class HomeComponent implements OnInit {
   }
 
   // Fonksiyonu bileşeninizin içerisinde uygun bir yerde tanımlayın
-  get(image: any) {
-    // Resim verilerini JSON formatına dönüştür
-
+  async get(image: any) {
+    this.fileContent = '';
+    var fileInput = document.getElementById(
+      'imageUpload'
+    ) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = ''; // Dosya yolu temizleme
+      fileInput.files = null; // Dosyaları temizleme
+    }
     // İlgili form kontrol gruplarını alın
     const widthControl = this.otherDataForm.get('width');
     const heightControl = this.otherDataForm.get('height');
@@ -128,10 +138,12 @@ export class HomeComponent implements OnInit {
     const horizontalDistancesControl = this.otherDataForm.get(
       'horizontalDistances'
     );
+
     // İlgili form kontrol gruplarına resim verilerini doldurun
     widthControl?.patchValue(image.width);
     heightControl?.patchValue(image.height);
     horizontalLinesControl?.patchValue(image.horizontalLines);
+
     selectedAreaNumberControl?.patchValue(image.selectedAreaNumber);
     verticalLinesControl?.patchValue(image.verticalLines);
 
@@ -148,11 +160,20 @@ export class HomeComponent implements OnInit {
         distanceControl.setValue(image.verticalDistances[i]);
       }
     }
-
+    const data = await this.fileService.getFile(image.fileName);
+    if (data) {
+      this.fileContent = data;
+    }
+    const filecontent = this.fileContent;
+    const fileName = image.fileName;
+    const element = document.getElementById('isImageUploaded');
+    if (element) {
+      element.classList.remove('hidden');
+    }
+    this.base64ToFile(filecontent, fileName);
     // Call drawRectangle() method to update the canvas
     this.drawRectangle();
   }
-
 
   addMaxValueListeners(controlName: string, maxValue: number) {
     this.otherDataForm.get(controlName)?.valueChanges.subscribe((value) => {
@@ -237,6 +258,29 @@ export class HomeComponent implements OnInit {
       verticalDistancesForm.addControl('distance_' + i, new FormControl(null));
     }
   }
+  base64ToFile(base64Content: string, fileName: string) {
+    console.log('base64Content:', base64Content, 'fileName:', fileName);
+    const base64Data = base64Content.replace(/^data:[a-z\/]+;base64,/, '');
+    const binaryData = Buffer.from(base64Data, 'base64');
+    const file = new File([binaryData], fileName);
+
+    // Bir DataTransferItemList nesnesi oluşturun
+    const dt = new DataTransfer();
+
+    // DataTransferItemList'e file nesnesini ekleyin
+    dt.items.add(file);
+
+    // DataTransferItemList'den bir FileList nesnesi alın
+    const fileList = dt.files;
+    const input = document.getElementById('imageUpload') as HTMLInputElement;
+
+    // Input file'ın files özelliğini FileList ile değiştirin
+    if (input) {
+
+      input.files = fileList;
+    }
+  }
+
   drawRectangle(): void {
     let width = Number(this.otherDataForm.value.width); // Number() fonksiyonu eklendi
     let height = Number(this.otherDataForm.value.height); // Number() fonksiyonu eklendi
@@ -467,14 +511,43 @@ export class HomeComponent implements OnInit {
 
           // Read the selected file as a data URL
           reader.readAsDataURL(file);
-        }
+        } /*else if (this.fileContent) {
+          // Örnek kullanım
+          const fileContent = this.fileContent; // Base64 kodunu içeren değişken
+          const convertedImage = this.base64ToFile(fileContent);
+
+          const file = convertedImage;
+          const reader = new FileReader();
+
+          reader.onload = () => {
+            const image = new Image();
+            image.onload = () => {
+              // Draw the image on the canvas
+              if (number === selectedAreaNumber) {
+                ctx.drawImage(
+                  image,
+                  selectedAreaX,
+                  selectedAreaY,
+                  selectedAreaWidth,
+                  selectedAreaHeight
+                );
+              }
+            };
+
+            // Set the source of the image to the loaded file
+            image.src = reader.result as string;
+          };
+
+          // Read the selected file as a data URL
+          reader.readAsDataURL(file);
+        }*/
 
         // Oda numarasını arttır
         roomNumber++;
       }
     }
 
-    // Reset canvas context
+        // Reset canvas context
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
   fileChangeEvent = async (event: Event) => {
@@ -487,7 +560,6 @@ export class HomeComponent implements OnInit {
 
       // Dosyayı base64 formatına dönüştürme fonksiyonunu çağır
       const fileBase64 = await this.readFileAsBase64(file);
-      console.log('fileBase64', fileBase64);
 
       // Base64 formatındaki dosyayı this.imageBase64'e eşitle
       this.imageBase64 = fileBase64;
@@ -544,7 +616,6 @@ export class HomeComponent implements OnInit {
 
     // Dosyayı Base64 formatına dönüştür
     const fileBase64 = this.imageBase64;
-    console.log('fileBase64', fileBase64);
     const horizontalDistances: string[] = [];
     const verticalDistances: string[] = [];
 
