@@ -119,7 +119,6 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  // Fonksiyonu bileşeninizin içerisinde uygun bir yerde tanımlayın
   async get(image: any) {
     const result = await this.imageProcessingService.processImage(
       image,
@@ -147,27 +146,6 @@ export class HomeComponent implements OnInit {
     const canvas = this.canvas.nativeElement;
     canvas.width = 800;
     canvas.height = 600;
-    let width = this.otherDataForm.value.width;
-    let height = this.otherDataForm.value.height;
-    // Create a new fabric.Canvas instance and set its dimensions
-    const canvasElement = this.canvas.nativeElement;
-    this.fabricCanvas = new fabric.Canvas(canvasElement);
-    this.fabricCanvas.setDimensions({
-      width: canvas.width,
-      height: canvas.height,
-    });
-
-    // Set a minimum scale value
-    const minScale = 0.5;
-
-    // Calculate the scale factor based on the desired width and height of the rectangle
-    let scale = Math.min(canvas.width / width, canvas.height / height);
-
-    // Ensure that the scale factor is not less than the minimum scale value
-    scale = Math.max(minScale, scale);
-
-    // Scale the canvas using the fabric.Canvas.setZoom() method
-    this.fabricCanvas.setZoom(scale);
   }
 
   onSubmit(): void {
