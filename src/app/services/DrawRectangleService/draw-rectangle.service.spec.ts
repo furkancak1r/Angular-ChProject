@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { DrawRectangleService } from './draw-rectangle.service';
+import { DrawingService } from './draw-rectangle.service';
 
-describe('DrawRectangleService', () => {
-  let service: DrawRectangleService;
+describe('DrawingService', () => {
+  let service: DrawingService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(DrawRectangleService);
+    service = TestBed.inject(DrawingService);
   });
 
   it('should be created', () => {

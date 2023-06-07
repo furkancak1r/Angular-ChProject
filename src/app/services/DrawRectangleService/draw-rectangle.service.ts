@@ -1,19 +1,15 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-export class RectangleDrawingService {
-  drawRectangle(
-    otherDataFormValue: any,
-    canvas: HTMLCanvasElement,
-    imageUploadInput: HTMLInputElement,
-    selectedAreaNumberInput: HTMLInputElement | null
-  ): void {
-    let width = otherDataFormValue.width;
-    let height = otherDataFormValue.height;
-    const horizontalDistances = otherDataFormValue.horizontalDistances;
-    const verticalDistances = otherDataFormValue.verticalDistances;
+export class DrawingService {
+  drawRectangle(otherDataForm: any, canvas: HTMLCanvasElement): void {
+    let width = Number(otherDataForm.value.width); // Number() fonksiyonu eklendi
+    let height = Number(otherDataForm.value.height); // Number() fonksiyonu eklendi
+    const horizontalDistances = otherDataForm.value.horizontalDistances;
+    const verticalDistances = otherDataForm.value.verticalDistances;
+
     if (!width || !height) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -90,7 +86,7 @@ export class RectangleDrawingService {
     // Yatay çizgileri ve koordinatlarını çiz
     let currentY = offsetY;
     for (const key in horizontalDistances) {
-      const distance = horizontalDistances[key];
+      const distance = Number(horizontalDistances[key]);
       if (distance !== null) {
         currentY += distance;
         const isBeyondBounds = currentY > height + offsetY;
@@ -104,6 +100,7 @@ export class RectangleDrawingService {
           width + Math.max(20, textWidth) + offsetX,
           (canvas.width - textWidth - 10) / scale
         );
+
         ctx.fillStyle = isBeyondBounds ? 'red' : 'black';
         ctx.fillText(`${distance}mm`, textX, currentY);
 
@@ -116,7 +113,7 @@ export class RectangleDrawingService {
     // Dikey çizgileri ve koordinatlarını çiz
     let currentX = offsetX;
     for (const key in verticalDistances) {
-      const distance = verticalDistances[key];
+      const distance = Number(verticalDistances[key]);
       if (distance !== null) {
         currentX += distance;
         const isBeyondBounds = currentX > width + offsetX;
@@ -144,8 +141,12 @@ export class RectangleDrawingService {
       }
     }
     verticalLines.push(width + offsetX); // Dikdörtgenin sağ kenarını ekle
+
     // Oda numaralarını al
-    let selectedAreaNumber = selectedAreaNumberInput?.value;
+    let selectedAreaNumber = Number(
+      (document.getElementById('selectedAreaNumber') as HTMLInputElement | null)
+        ?.value
+    );
 
     // Her oda için bir numara yaz
     let roomNumber = 1; // Oda numarasını tutan değişken
@@ -158,10 +159,9 @@ export class RectangleDrawingService {
       for (let j = 0; j < verticalLines.length - 1; j++) {
         // Son elemanı atla
         // Oda numarasını metin olarak al
-        const number = roomNumber.toString();
-
+        const number = roomNumber;
         // Metnin genişliğini ve yüksekliğini ölç
-        const textWidth = ctx.measureText(number).width;
+        const textWidth = 8.8984375;
         const textHeight = parseInt(ctx.font);
 
         // Metnin yazılacağı x ve y koordinatlarını hesapla
@@ -180,6 +180,7 @@ export class RectangleDrawingService {
         // Oda genişliğini ve yüksekliğini hesapla
         const roomWidth = verticalLines[j + 1] - verticalLines[j];
         const roomHeight = horizontalLines[i + 1] - horizontalLines[i];
+
         // Eğer oda numarası seçilen oda numarasına eşitse, x ve y koordinatlarını ve genişlik ve yüksekliği kaydet
         if (number === selectedAreaNumber) {
           // selectedAreaX değerini dikey çizginin x koordinatı olarak ata
@@ -201,7 +202,7 @@ export class RectangleDrawingService {
         y += correctionY;
 
         // Metni yaz
-        ctx.fillText(number, x, y);
+        ctx.fillText(number.toString(), x, y);
 
         // Upload edilen resmi canvas üzerine çiz
         const fileInput = document.getElementById(
@@ -232,10 +233,43 @@ export class RectangleDrawingService {
 
           // Read the selected file as a data URL
           reader.readAsDataURL(file);
-        }
+        } /*else if (this.fileContent) {
+          // Örnek kullanım
+          const fileContent = this.fileContent; // Base64 kodunu içeren değişken
+          const convertedImage = this.base64ToFile(fileContent);
 
+          const file = convertedImage;
+          const reader = new FileReader();
+
+          reader.onload = () => {
+            const image = new Image();
+            image.onload = () => {
+              // Draw the image on the canvas
+              if (number === selectedAreaNumber) {
+                ctx.drawImage(
+                  image,
+                  selectedAreaX,
+                  selectedAreaY,
+                  selectedAreaWidth,
+                  selectedAreaHeight
+                );
+              }
+            };
+
+            // Set the source of the image to the loaded file
+            image.src = reader.result as string;
+          };
+
+          // Read the selected file as a data URL
+          reader.readAsDataURL(file);
+        }*/
+
+        // Oda numarasını arttır
         roomNumber++;
       }
     }
+
+    // Reset canvas context
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 }
