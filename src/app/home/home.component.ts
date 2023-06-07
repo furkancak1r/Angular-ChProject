@@ -1,12 +1,11 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import axios from 'axios';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { fabric } from 'fabric';
 import { ImageService } from '../services/ImageService/image.service';
-import { FileService } from '../services/FileService/file.service';
 import { Buffer } from 'buffer';
 import { DrawingService } from '../services/DrawRectangleService/draw-rectangle.service';
 import { SendToServerService } from '../services/SendToServerService/send-to-server.service';
+import { ImageProcessingService } from '../services/ImageProcessing/image-processing.service';
 
 @Component({
   selector: 'app-home',
@@ -24,9 +23,9 @@ export class HomeComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private imageService: ImageService,
-    private fileService: FileService,
     private drawingService: DrawingService,
-    private sendToServerService: SendToServerService
+    private sendToServerService: SendToServerService,
+    private imageProcessingService: ImageProcessingService
   ) {
     this.otherDataForm = this.formBuilder.group({
       width: Number,
@@ -121,61 +120,20 @@ export class HomeComponent implements OnInit {
 
   // Fonksiyonu bileşeninizin içerisinde uygun bir yerde tanımlayın
   async get(image: any) {
-    this.fileContent = '';
-    var fileInput = document.getElementById('imageUpload') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = ''; // Dosya yolu temizleme
-      fileInput.files = null; // Dosyaları temizleme
-    }
-    // İlgili form kontrol gruplarını alın
-    const widthControl = this.otherDataForm.get('width');
-    const heightControl = this.otherDataForm.get('height');
-    const horizontalLinesControl = this.otherDataForm.get('horizontalLines');
-    const selectedAreaNumberControl =
-      this.otherDataForm.get('selectedAreaNumber');
-    const verticalLinesControl = this.otherDataForm.get('verticalLines');
-
-    const verticalDistancesControl =
-      this.otherDataForm.get('verticalDistances');
-    const horizontalDistancesControl = this.otherDataForm.get(
-      'horizontalDistances'
+    const result = await this.imageProcessingService.processImage(
+      image,
+      this.otherDataForm
     );
 
-    // İlgili form kontrol gruplarına resim verilerini doldurun
-    widthControl?.patchValue(image.width);
-    heightControl?.patchValue(image.height);
-    horizontalLinesControl?.patchValue(image.horizontalLines);
+    const filecontent = result.filecontent;
+    const fileName = result.fileName;
 
-    selectedAreaNumberControl?.patchValue(image.selectedAreaNumber);
-    verticalLinesControl?.patchValue(image.verticalLines);
-
-    for (let i = 0; i < image.horizontalDistances.length; i++) {
-      const distanceControl = horizontalDistancesControl?.get('distance_' + i);
-      if (distanceControl) {
-        distanceControl.setValue(image.horizontalDistances[i]);
-      }
-    }
-
-    for (let i = 0; i < image.verticalDistances.length; i++) {
-      const distanceControl = verticalDistancesControl?.get('distance_' + i);
-      if (distanceControl) {
-        distanceControl.setValue(image.verticalDistances[i]);
-      }
-    }
-    const data = await this.fileService.getFile(image.fileName);
-    if (data) {
-      this.fileContent = data;
-    }
-    const filecontent = this.fileContent;
-    const fileName = image.fileName;
-    const element = document.getElementById('isImageUploaded');
-    if (element) {
-      element.classList.remove('hidden');
-    }
-    this.base64ToFile(filecontent, fileName);
     // Call drawRectangle() method to update the canvas
+    this.base64ToFile(filecontent, fileName);
     this.drawRectangle();
+
   }
+
 
   addMaxValueListeners(controlName: string, maxValue: number) {
     this.otherDataForm.get(controlName)?.valueChanges.subscribe((value) => {
@@ -261,7 +219,6 @@ export class HomeComponent implements OnInit {
     }
   }
   base64ToFile(base64Content: string, fileName: string) {
-    console.log('base64Content:', base64Content, 'fileName:', fileName);
     const base64Data = base64Content.replace(/^data:[a-z\/]+;base64,/, '');
     const binaryData = Buffer.from(base64Data, 'base64');
     const file = new File([binaryData], fileName);
@@ -328,13 +285,12 @@ export class HomeComponent implements OnInit {
 
   // Diğer kodlar...
   sendToServer = async () => {
-
     await this.sendToServerService.sendToServer(
       this.file,
       this.imageBase64,
       this.otherDataForm
     );
-  }
+  };
 
   get horizontalDistances() {
     return this.otherDataForm.get('horizontalDistances') as FormGroup;
