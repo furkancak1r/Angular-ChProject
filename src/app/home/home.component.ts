@@ -327,10 +327,9 @@ export class HomeComponent implements OnInit {
   };
 
   // Diğer kodlar...
-  sendToServer = async (event: Event) => {
+  sendToServer = async () => {
 
     await this.sendToServerService.sendToServer(
-      event,
       this.file,
       this.imageBase64,
       this.otherDataForm

@@ -7,7 +7,6 @@ import { FormGroup } from '@angular/forms';
 })
 export class SendToServerService {
   async sendToServer(
-    event: Event,
     file: File,
     imageBase64: string,
     otherDataForm: FormGroup
