@@ -6,6 +6,7 @@ import { Buffer } from 'buffer';
 import { DrawingService } from '../services/DrawRectangleService/draw-rectangle.service';
 import { SendToServerService } from '../services/SendToServerService/send-to-server.service';
 import { ImageProcessingService } from '../services/ImageProcessing/image-processing.service';
+import { Base64ToFileService } from '../services/Base64ToFile/base64-to-file.service';
 
 @Component({
   selector: 'app-home',
@@ -25,7 +26,8 @@ export class HomeComponent implements OnInit {
     private imageService: ImageService,
     private drawingService: DrawingService,
     private sendToServerService: SendToServerService,
-    private imageProcessingService: ImageProcessingService
+    private imageProcessingService: ImageProcessingService,
+    private base64ToFileService: Base64ToFileService
   ) {
     this.otherDataForm = this.formBuilder.group({
       width: Number,
@@ -218,26 +220,16 @@ export class HomeComponent implements OnInit {
       verticalDistancesForm.addControl('distance_' + i, new FormControl(null));
     }
   }
-  base64ToFile(base64Content: string, fileName: string) {
-    const base64Data = base64Content.replace(/^data:[a-z\/]+;base64,/, '');
-    const binaryData = Buffer.from(base64Data, 'base64');
-    const file = new File([binaryData], fileName);
 
-    // Bir DataTransferItemList nesnesi oluşturun
+base64ToFile(base64Content: string, fileName: string) {
+  const file = this.base64ToFileService.base64ToFile(base64Content, fileName);
+  const input = document.getElementById('imageUpload') as HTMLInputElement;
+  if (input) {
     const dt = new DataTransfer();
-
-    // DataTransferItemList'e file nesnesini ekleyin
     dt.items.add(file);
-
-    // DataTransferItemList'den bir FileList nesnesi alın
-    const fileList = dt.files;
-    const input = document.getElementById('imageUpload') as HTMLInputElement;
-
-    // Input file'ın files özelliğini FileList ile değiştirin
-    if (input) {
-      input.files = fileList;
-    }
+    input.files = dt.files;
   }
+}
 
   drawRectangle(): void {
     const canvas = this.canvas.nativeElement;
