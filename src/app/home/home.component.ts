@@ -2,7 +2,6 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { fabric } from 'fabric';
 import { ImageService } from '../services/ImageService/image.service';
-import { Buffer } from 'buffer';
 import { DrawingService } from '../services/DrawRectangleService/draw-rectangle.service';
 import { SendToServerService } from '../services/SendToServerService/send-to-server.service';
 import { ImageProcessingService } from '../services/ImageProcessing/image-processing.service';
@@ -18,7 +17,7 @@ export class HomeComponent implements OnInit {
   otherDataForm: FormGroup;
   images: any[] = [];
   fabricCanvas: fabric.Canvas | null = null;
-  file!: File; // File tipinde bir de
+  file!: File;
   imageBase64!: string;
   fileContent!: string;
   constructor(
@@ -133,9 +132,7 @@ export class HomeComponent implements OnInit {
     // Call drawRectangle() method to update the canvas
     this.base64ToFile(filecontent, fileName);
     this.drawRectangle();
-
   }
-
 
   addMaxValueListeners(controlName: string, maxValue: number) {
     this.otherDataForm.get(controlName)?.valueChanges.subscribe((value) => {
@@ -221,15 +218,15 @@ export class HomeComponent implements OnInit {
     }
   }
 
-base64ToFile(base64Content: string, fileName: string) {
-  const file = this.base64ToFileService.base64ToFile(base64Content, fileName);
-  const input = document.getElementById('imageUpload') as HTMLInputElement;
-  if (input) {
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    input.files = dt.files;
+  base64ToFile(base64Content: string, fileName: string) {
+    const file = this.base64ToFileService.base64ToFile(base64Content, fileName);
+    const input = document.getElementById('imageUpload') as HTMLInputElement;
+    if (input) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      input.files = dt.files;
+    }
   }
-}
 
   drawRectangle(): void {
     const canvas = this.canvas.nativeElement;
