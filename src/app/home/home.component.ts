@@ -6,6 +6,7 @@ import { ImageService } from '../services/ImageService/image.service';
 import { FileService } from '../services/FileService/file.service';
 import { Buffer } from 'buffer';
 import { DrawingService } from '../services/DrawRectangleService/draw-rectangle.service';
+import { SendToServerService } from '../services/SendToServerService/send-to-server.service';
 
 @Component({
   selector: 'app-home',
@@ -24,7 +25,8 @@ export class HomeComponent implements OnInit {
     private formBuilder: FormBuilder,
     private imageService: ImageService,
     private fileService: FileService,
-    private drawingService: DrawingService
+    private drawingService: DrawingService,
+    private sendToServerService: SendToServerService
   ) {
     this.otherDataForm = this.formBuilder.group({
       width: Number,
@@ -326,93 +328,15 @@ export class HomeComponent implements OnInit {
 
   // Diğer kodlar...
   sendToServer = async (event: Event) => {
-    // Girdi verilerini al
-    const width =
-      (document.getElementById('width') as HTMLInputElement)?.value || '';
-    const height =
-      (document.getElementById('height') as HTMLInputElement)?.value || '';
-    const horizontalLines =
-      (document.getElementById('horizontalLines') as HTMLInputElement)?.value ||
-      '';
-    const selectedAreaNumber =
-      (document.getElementById('selectedAreaNumber') as HTMLInputElement)
-        ?.value || '';
-    const verticalLines =
-      (document.getElementById('verticalLines') as HTMLInputElement)?.value ||
-      '';
 
-    let file = this.file;
-    if (!file) {
-      console.log('sendToServerfile:', file);
-      alert('Lütfen bir dosya seçin');
-      return;
-    }
-    const fileName = file.name;
+    await this.sendToServerService.sendToServer(
+      event,
+      this.file,
+      this.imageBase64,
+      this.otherDataForm
+    );
+  }
 
-    // Dosyayı Base64 formatına dönüştür
-    const fileBase64 = this.imageBase64;
-    const horizontalDistances: string[] = [];
-    const verticalDistances: string[] = [];
-
-    // Yatay mesafeleri diziye ekle
-    if (
-      Number(horizontalLines) >= 0 &&
-      this.otherDataForm?.get('horizontalDistances')
-    ) {
-      const horizontalDistancesForm = this.otherDataForm.get(
-        'horizontalDistances'
-      );
-      if (horizontalDistancesForm instanceof FormGroup) {
-        const distanceControls = Object.keys(horizontalDistancesForm.controls);
-        for (let i = 0; i < distanceControls.length; i++) {
-          const distanceControl = horizontalDistancesForm.get('distance_' + i);
-          if (distanceControl) {
-            horizontalDistances.push(distanceControl.value);
-          }
-        }
-      }
-    }
-
-    // Dikey mesafeleri diziye ekle
-    if (
-      Number(verticalLines) >= 0 &&
-      this.otherDataForm?.get('verticalDistances')
-    ) {
-      const verticalDistancesForm = this.otherDataForm.get('verticalDistances');
-      if (verticalDistancesForm instanceof FormGroup) {
-        const distanceControls = Object.keys(verticalDistancesForm.controls);
-        for (let i = 0; i < distanceControls.length; i++) {
-          const distanceControl = verticalDistancesForm.get('distance_' + i);
-          if (distanceControl) {
-            verticalDistances.push(distanceControl.value);
-          }
-        }
-      }
-    }
-
-    // Sunucuya post isteği gönder
-    try {
-      const response = await axios.post(
-        'http://localhost:3000/api_chproject/post/images',
-        {
-          fileName,
-          width,
-          height,
-          horizontalLines,
-          selectedAreaNumber,
-          verticalLines,
-          fileBase64,
-          horizontalDistances,
-          verticalDistances,
-        }
-      );
-      console.log('Veri sunucuya gönderildi:', response.data);
-      alert('Veriler başarıyla kaydedildi');
-    } catch (error) {
-      console.error('Sunucuya veri gönderme hatası:', error);
-      alert('Kaydederken sorun oluştu');
-    }
-  };
   get horizontalDistances() {
     return this.otherDataForm.get('horizontalDistances') as FormGroup;
   }
