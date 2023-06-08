@@ -105,7 +105,6 @@ export class HomeComponent implements OnInit {
     this.imageService.getImages().subscribe(
       (data) => {
         this.images = data;
-        console.log(this.images);
         // Sayfayı 100 piksel aşağı kaydır
         // Sayfanın en altına git
         // Sayfa yüklendikten sonra çalışacak kod
@@ -164,14 +163,15 @@ export class HomeComponent implements OnInit {
     canvas.height = 600;
   }
 
-  onSubmit(): void {
+  ClearAll(): void {
     const canvas = this.canvas.nativeElement;
     const ctx = canvas.getContext('2d');
     if (ctx) {
       // Clear the canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-
+    const table = document.getElementById('table');
+    table?.classList.add('hidden');
     // Reset the form
     this.otherDataForm.reset();
   }
