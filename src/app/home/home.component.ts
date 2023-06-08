@@ -6,6 +6,7 @@ import { DrawingService } from '../services/DrawRectangleService/draw-rectangle.
 import { SendToServerService } from '../services/SendToServerService/send-to-server.service';
 import { ImageProcessingService } from '../services/ImageProcessing/image-processing.service';
 import { Base64ToFileService } from '../services/Base64ToFile/base64-to-file.service';
+import { ImageDeleteService } from '../services/ImageDeleteService/image-delete.service';
 
 @Component({
   selector: 'app-home',
@@ -26,7 +27,8 @@ export class HomeComponent implements OnInit {
     private drawingService: DrawingService,
     private sendToServerService: SendToServerService,
     private imageProcessingService: ImageProcessingService,
-    private base64ToFileService: Base64ToFileService
+    private base64ToFileService: Base64ToFileService,
+    private imageDeleteService: ImageDeleteService
   ) {
     this.otherDataForm = this.formBuilder.group({
       width: Number,
@@ -132,7 +134,21 @@ export class HomeComponent implements OnInit {
     this.base64ToFile(filecontent, fileName);
     this.drawRectangle();
   }
+  deleteImage(fileName: string): void {
+    this.imageDeleteService.deleteImage(fileName).subscribe(
+      (response) => {
+        console.log('Dosya başarıyla silindi.', response);
+        alert('Dosya başarıyla silindi.');
+        this.loadImages();
 
+        // Silme işlemi başarılı olduğunda yapılacak işlemler
+      },
+      (error) => {
+        console.error('Dosya silinirken hata oluştu.', error);
+        // Hata durumunda yapılacak işlemler
+      }
+    );
+  }
   addMaxValueListeners(controlName: string, maxValue: number) {
     this.otherDataForm.get(controlName)?.valueChanges.subscribe((value) => {
       if (value > maxValue) {

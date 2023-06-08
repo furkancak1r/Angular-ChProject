@@ -162,21 +162,29 @@
 <table id="table" class="table hidden">
   <thead>
     <tr>
-      <th scope="col">Get Button</th>
-      <th scope="col">Width</th>
-      <th scope="col">Height</th>
-      <th scope="col">Horizontal Lines</th>
-      <th scope="col">Selected Area Number</th>
-      <th scope="col">Vertical Lines</th>
-      <th scope="col">Horizontal Distances</th>
-      <th scope="col">Vertical Distances</th>
-      <th scope="col">Image Names</th>
+
+      <th scope="col">Getir Butonu</th>
+      <th scope="col">Sil Butonu</th>
+
+      <th scope="col">Genişlik</th>
+      <th scope="col">Yükseklik</th>
+      <th scope="col">Yatay Çizgiler</th>
+      <th scope="col">Seçili Alan Numarası</th>
+      <th scope="col">Dikey Çizgiler</th>
+      <th scope="col">Yatay Mesafeler</th>
+      <th scope="col">Dikey Mesafeler</th>
+      <th scope="col">Resim İsimleri</th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let image of images; let i = index">
       <td>
-        <button id="{{ 'index_' + i }}" (click)="get(image)">Get</button>
+        <button class="btn btn-success" id="{{ 'index_' + i }}" (click)="get(image)">Getir</button>
+
+      </td>
+      <td>
+        <button class="btn btn-danger" id="{{ 'index_' + i }}" (click)="deleteImage(image.fileName)">Sil</button>
+
       </td>
       <td>{{ image.width }}</td>
       <td>{{ image.height }}</td>
